@@ -97,8 +97,8 @@ const SupportTicketForm = () => {
   const selectedOption = identificationOptions.find(opt => opt.id === formData.method);
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <Card className="form-card w-full max-w-md mx-auto">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--gradient-sunset)' }}>
+      <Card className="form-card w-full max-w-md mx-auto bg-white/95 backdrop-blur-sm">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Support Ticket</CardTitle>
           <CardDescription>
@@ -165,7 +165,9 @@ const SupportTicketForm = () => {
                   <Button
                     onClick={() => handleSubmit()}
                     disabled={!formData.value.trim() || isLoading}
+                    variant="sunset"
                     className="w-full"
+                    style={{ background: 'var(--gradient-primary)' }}
                   >
                     {isLoading ? (
                       <>
