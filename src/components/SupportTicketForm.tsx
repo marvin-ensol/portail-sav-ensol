@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { Plus } from "lucide-react";
 import ContactSearch from "./ContactSearch";
 import TicketsList from "./TicketsList";
+import DealsList from "./DealsList";
 import ProgressIndicator from "./ProgressIndicator";
 
 type IdentificationMethod = "phone" | "email";
@@ -20,6 +23,18 @@ interface TicketData {
   priority: string;
   createdDate: string | null;
   lastModified: string | null;
+}
+
+interface DealData {
+  id: string;
+  dealId: string;
+  name: string;
+  stage: string;
+  amount: string;
+  closeDate: string | null;
+  createdDate: string | null;
+  pipeline: string;
+  dealType: string | null;
 }
 
 interface ContactData {
@@ -48,6 +63,8 @@ const SupportTicketForm = () => {
   const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
   const [tickets, setTickets] = useState<TicketData[]>([]);
   const [ticketsLoading, setTicketsLoading] = useState(false);
+  const [deals, setDeals] = useState<DealData[]>([]);
+  const [dealsLoading, setDealsLoading] = useState(false);
 
   // UTM parameter detection and auto-population
   useEffect(() => {
@@ -92,9 +109,9 @@ const SupportTicketForm = () => {
       console.log('Search result:', data);
       setSearchResult(data);
       
-      // If contact found, search for tickets and go to step 2
+      // If contact found, search for deals and go to step 2
       if (data.found && data.contact) {
-        await searchTickets(data.contact.contactId);
+        await searchDeals(data.contact.contactId);
         setCurrentStep(2);
       } else {
         // If contact not found, stay on step 1 to show error inline
@@ -112,44 +129,49 @@ const SupportTicketForm = () => {
     }
   };
 
-  const searchTickets = async (contactId: string) => {
-    setTicketsLoading(true);
-    setTickets([]);
+  const searchDeals = async (contactId: string) => {
+    setDealsLoading(true);
+    setDeals([]);
 
     try {
-      console.log('Searching tickets for contact ID:', contactId);
+      console.log('Searching deals for contact ID:', contactId);
       
-      const { data, error } = await supabase.functions.invoke('search-hubspot-tickets', {
+      const { data, error } = await supabase.functions.invoke('search-hubspot-deals', {
         body: { contactId }
       });
 
-      console.log('Tickets search response:', { data, error });
+      console.log('Deals search response:', { data, error });
 
       if (error) {
         console.error('Supabase function error:', error);
         return;
       }
 
-      if (data.success && data.tickets) {
-        setTickets(data.tickets);
-        console.log(`Found ${data.tickets.length} tickets`);
+      if (data.success && data.deals) {
+        setDeals(data.deals);
+        console.log(`Found ${data.deals.length} deals`);
       }
     } catch (error) {
-      console.error('Error searching tickets:', error);
+      console.error('Error searching deals:', error);
     } finally {
-      setTicketsLoading(false);
+      setDealsLoading(false);
     }
   };
 
-  const handleTicketClick = (ticket: TicketData) => {
-    // TODO: Navigate to ticket details or handle ticket selection
-    console.log('Ticket clicked:', ticket);
+  const handleDealClick = (deal: DealData) => {
+    // TODO: Navigate to deal details or handle deal selection
+    console.log('Deal clicked:', deal);
+  };
+
+  const handleNewTicket = () => {
+    // TODO: Navigate to new ticket creation
+    console.log('Creating new ticket');
   };
 
   const handleTryAgain = () => {
     setCurrentStep(1);
     setSearchResult(null);
-    setTickets([]);
+    setDeals([]);
     setFormData({ method: "phone", value: "" });
   };
 
@@ -169,8 +191,8 @@ const SupportTicketForm = () => {
         </CardHeader>
         
         <CardContent className="space-y-6">
-          {/* Progress indicator at top */}
-          <ProgressIndicator currentStep={currentStep} />
+          {/* Progress indicator at top - hidden on step 2 */}
+          {currentStep === 1 && <ProgressIndicator currentStep={currentStep} />}
           
           {/* Step 1: Contact Search */}
           <div className={`form-step ${currentStep === 1 ? 'active' : ''}`}>
@@ -185,13 +207,27 @@ const SupportTicketForm = () => {
             )}
           </div>
 
-          {/* Step 2: Tickets List */}
+          {/* Step 2: Deals List */}
           {currentStep === 2 && searchResult?.found && (
-            <TicketsList
-              tickets={tickets}
-              isLoading={ticketsLoading}
-              onTicketClick={handleTicketClick}
-            />
+            <>
+              <DealsList
+                deals={deals}
+                isLoading={dealsLoading}
+                onDealClick={handleDealClick}
+              />
+              
+              {/* New Ticket Button */}
+              <div className="pt-4 border-t">
+                <Button
+                  onClick={handleNewTicket}
+                  className="w-full h-12 text-base font-medium"
+                  variant="outline"
+                >
+                  <Plus className="mr-2 h-5 w-5" />
+                  Nouvelle demande
+                </Button>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
