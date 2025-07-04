@@ -44,53 +44,29 @@ serve(async (req) => {
       );
     }
 
-    // Search for tickets associated with the contact
-    const ticketsUrl = `https://api.hubapi.com/crm/v3/objects/tickets/search`;
+    // Search for tickets associated with the contact using associations API
+    const ticketsUrl = `https://api.hubapi.com/crm/v4/objects/contact/${contactId}/associations/ticket`;
     
-    const searchBody = {
-      filterGroups: [
-        {
-          filters: [
-            {
-              propertyName: "hubspot_owner_id",
-              operator: "EQ",
-              value: contactId
-            }
-          ]
-        }
-      ],
-      properties: [
-        "hs_ticket_id",
-        "subject",
-        "hs_pipeline_stage", 
-        "hs_ticket_priority",
-        "createdate",
-        "hs_lastmodifieddate"
-      ],
-      limit: 100
-    };
-
-    console.log('Searching tickets with body:', JSON.stringify(searchBody));
+    console.log('Searching tickets associated with contact:', contactId);
 
     const ticketsResponse = await fetch(ticketsUrl, {
-      method: 'POST',
+      method: 'GET',
       headers: {
         'Authorization': `Bearer ${hubspotAccessToken}`,
         'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(searchBody)
+      }
     });
 
-    const ticketsData = await ticketsResponse.json();
-    console.log('HubSpot tickets response:', ticketsData);
+    const associationsData = await ticketsResponse.json();
+    console.log('HubSpot associations response:', associationsData);
 
     if (!ticketsResponse.ok) {
-      console.error('HubSpot tickets API error:', ticketsData);
+      console.error('HubSpot associations API error:', associationsData);
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: 'Failed to search tickets in HubSpot',
-          details: ticketsData
+          error: 'Failed to get ticket associations from HubSpot',
+          details: associationsData
         }),
         { 
           status: ticketsResponse.status, 
@@ -99,7 +75,66 @@ serve(async (req) => {
       );
     }
 
-    const tickets = ticketsData.results || [];
+    const ticketIds = associationsData.results?.map((assoc: any) => assoc.toObjectId) || [];
+    console.log('Found associated ticket IDs:', ticketIds);
+
+    if (ticketIds.length === 0) {
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          tickets: [],
+          count: 0
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    // Now get the ticket details using the IDs
+    const ticketDetailsUrl = 'https://api.hubapi.com/crm/v3/objects/tickets/batch/read';
+    const ticketDetailsBody = {
+      inputs: ticketIds.map((id: string) => ({ id })),
+      properties: [
+        "hs_ticket_id",
+        "subject", 
+        "hs_pipeline_stage",
+        "hs_ticket_priority",
+        "createdate",
+        "hs_lastmodifieddate"
+      ]
+    };
+
+    console.log('Fetching ticket details for IDs:', ticketIds);
+
+    const ticketDetailsResponse = await fetch(ticketDetailsUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${hubspotAccessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(ticketDetailsBody)
+    });
+
+    const ticketDetailsData = await ticketDetailsResponse.json();
+    console.log('HubSpot ticket details response:', ticketDetailsData);
+
+    if (!ticketDetailsResponse.ok) {
+      console.error('HubSpot ticket details API error:', ticketDetailsData);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Failed to get ticket details from HubSpot',
+          details: ticketDetailsData
+        }),
+        { 
+          status: ticketDetailsResponse.status, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    const tickets = ticketDetailsData.results || [];
     console.log(`Found ${tickets.length} tickets for contact ${contactId}`);
 
     // Format tickets for the frontend
