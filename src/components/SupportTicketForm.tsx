@@ -16,7 +16,7 @@ interface FormData {
 const SupportTicketForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>({
-    method: null,
+    method: "phone",
     value: "",
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -200,36 +200,39 @@ const SupportTicketForm = () => {
             {!autoSubmitted && (
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold mb-4">Comment aimeriez-vous vous identifier ?</h3>
-                <div className="grid gap-3">
+                
+                {/* Tab System */}
+                <div className="flex bg-muted rounded-lg p-1 w-full">
                   {identificationOptions.map((option) => {
                     const IconComponent = option.icon;
+                    const isActive = formData.method === option.id;
                     return (
-                      <div
+                      <button
                         key={option.id}
-                        className={`option-card ${formData.method === option.id ? 'selected' : ''}`}
                         onClick={() => handleMethodSelect(option.id)}
+                        className={`flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-md font-medium transition-all duration-200 ${
+                          isActive 
+                            ? 'bg-background text-foreground shadow-sm border border-border' 
+                            : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+                        }`}
                       >
-                        <div className="flex items-center space-x-3">
-                          <IconComponent className="h-5 w-5 text-primary" />
-                          <div className="flex-1">
-                            <div className="font-medium">{option.title}</div>
-                          </div>
-                          {formData.method === option.id && (
-                            <CheckCircle className="h-5 w-5 text-primary" />
-                          )}
-                        </div>
-                      </div>
+                        <IconComponent className="h-4 w-4" />
+                        <span className="text-sm hidden sm:inline">{option.title}</span>
+                        <span className="text-sm sm:hidden">
+                          {option.id === 'phone' ? 'Téléphone' : 'Email'}
+                        </span>
+                      </button>
                     );
                   })}
                 </div>
               </div>
             )}
 
-            {/* Input Field */}
+            {/* Input Field - Always show when method is selected or auto-submitted */}
             {(formData.method || autoSubmitted) && selectedOption && (
-              <div className="space-y-4 mt-6">
+              <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="identification">
+                  <Label htmlFor="identification" className="text-sm font-medium">
                     Saisissez votre {selectedOption.title.toLowerCase()}
                   </Label>
                   <div className="relative">
@@ -239,18 +242,18 @@ const SupportTicketForm = () => {
                       placeholder={selectedOption.placeholder}
                       value={formData.value}
                       onChange={(e) => handleInputChange(e.target.value)}
-                      className="w-full"
+                      className="w-full h-12 text-base"
                       disabled={isLoading || autoSubmitted}
                       onBlur={() => setTimeout(() => setShowEmailSuggestions(false), 200)}
                     />
                     
                     {/* Email suggestions dropdown */}
                     {showEmailSuggestions && formData.method === "email" && (
-                      <div className="absolute top-full left-0 right-0 bg-white border border-input rounded-md shadow-lg z-50 max-h-48 overflow-y-auto">
+                      <div className="absolute top-full left-0 right-0 bg-background border border-border rounded-md shadow-lg z-50 max-h-48 overflow-y-auto mt-1">
                         {emailSuggestions.map((suggestion, index) => (
                           <div
                             key={index}
-                            className="px-3 py-2 hover:bg-accent hover:text-accent-foreground cursor-pointer text-sm"
+                            className="px-3 py-2 hover:bg-accent hover:text-accent-foreground cursor-pointer text-sm border-b border-border last:border-b-0"
                             onClick={() => handleEmailSuggestionSelect(suggestion)}
                           >
                             {suggestion}
@@ -269,13 +272,12 @@ const SupportTicketForm = () => {
                       isLoading || 
                       (formData.method === "phone" && !validatePhoneNumber(formData.value))
                     }
-                    variant="sunset"
-                    className="w-full"
+                    className="w-full h-12 text-base font-medium"
                     style={{ background: 'var(--gradient-primary)' }}
                   >
                     {isLoading ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 loading-spinner" />
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                         Vérification...
                       </>
                     ) : (
@@ -285,8 +287,8 @@ const SupportTicketForm = () => {
                 )}
 
                 {autoSubmitted && isLoading && (
-                  <div className="text-center">
-                    <Loader2 className="mx-auto h-8 w-8 loading-spinner text-primary" />
+                  <div className="text-center py-4">
+                    <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
                     <p className="text-sm text-muted-foreground mt-2">
                       Vérification automatique de vos informations...
                     </p>
@@ -336,7 +338,7 @@ const SupportTicketForm = () => {
                     onClick={() => {
                       setCurrentStep(1);
                       setSearchResult(null);
-                      setFormData({ method: null, value: "" });
+                      setFormData({ method: "phone", value: "" });
                     }}
                     variant="outline"
                     className="w-full"
