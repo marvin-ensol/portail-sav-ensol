@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Ticket, Clock, Loader2 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,7 +11,18 @@ interface TicketsListProps {
 }
 
 const TicketsList = ({ tickets, isLoading, onTicketClick }: TicketsListProps) => {
-  const [activeTab, setActiveTab] = useState<"ongoing" | "resolved">("ongoing");
+  // Determine default tab based on ticket counts
+  const defaultTab = useMemo(() => {
+    const ongoingCount = tickets.filter(ticket => ticket.status !== "4").length;
+    return ongoingCount > 0 ? "ongoing" : "resolved";
+  }, [tickets]);
+
+  const [activeTab, setActiveTab] = useState<"ongoing" | "resolved">(defaultTab);
+
+  // Update active tab when tickets change (e.g., after initial load)
+  useEffect(() => {
+    setActiveTab(defaultTab);
+  }, [defaultTab]);
 
   const filteredAndSortedTickets = useMemo(() => {
     // Filter tickets based on status
