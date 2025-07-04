@@ -82,7 +82,8 @@ serve(async (req) => {
         'address',
         'postcode',
         'date_entered__installation_done_',
-        'products'
+        'products',
+        'is_quote_signed'
       ]
     }
 
@@ -105,7 +106,7 @@ serve(async (req) => {
     }
 
     const batchData = await batchResponse.json()
-    const deals = batchData.results?.map((deal: any) => ({
+    let deals = batchData.results?.map((deal: any) => ({
       id: deal.id,
       dealId: deal.id,
       name: deal.properties.dealname || 'Sans nom',
@@ -118,8 +119,21 @@ serve(async (req) => {
       address: deal.properties.address || '',
       postcode: deal.properties.postcode || '',
       dateEnteredInstallationDone: deal.properties.date_entered__installation_done_ || null,
-      products: deal.properties.products ? deal.properties.products.split(';') : []
+      products: deal.properties.products ? deal.properties.products.split(';') : [],
+      isQuoteSigned: deal.properties.is_quote_signed || '0'
     })) || []
+
+    // Filter deals where quote is signed (is_quote_signed = 1)
+    deals = deals.filter((deal: any) => deal.isQuoteSigned === '1')
+
+    // Sort by installation date (most recent first)
+    deals.sort((a: any, b: any) => {
+      if (!a.dateEnteredInstallationDone && !b.dateEnteredInstallationDone) return 0
+      if (!a.dateEnteredInstallationDone) return 1
+      if (!b.dateEnteredInstallationDone) return -1
+      
+      return new Date(b.dateEnteredInstallationDone).getTime() - new Date(a.dateEnteredInstallationDone).getTime()
+    })
 
     console.log(`Successfully fetched ${deals.length} deals`)
 

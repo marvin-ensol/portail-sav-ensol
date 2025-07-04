@@ -29,6 +29,7 @@ export interface DealData {
   postcode: string;
   dateEnteredInstallationDone: string | null;
   products: string[];
+  isQuoteSigned: string;
 }
 
 export interface ContactData {
