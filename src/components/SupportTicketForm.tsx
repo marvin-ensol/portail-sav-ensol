@@ -1,24 +1,25 @@
-import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Plus, ArrowLeft } from "lucide-react";
-import ContactSearch from "./ContactSearch";
-import TicketsList from "./TicketsList";
-import DealsList from "./DealsList";
-import TicketCreationForm from "./TicketCreationForm";
 import ProgressIndicator from "./ProgressIndicator";
+import StepRenderer from "./StepRenderer";
 import { useHubSpotSearch } from "@/hooks/useHubSpotSearch";
-import type { FormData, IdentificationMethod, TicketData, DealData } from "@/types/hubspot";
+import { useTicketFormState } from "@/hooks/useTicketFormState";
+import { useUrlParams } from "@/hooks/useUrlParams";
+import type { IdentificationMethod, TicketData, DealData } from "@/types/hubspot";
 
 const SupportTicketForm = () => {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState<FormData>({
-    method: "phone",
-    value: "",
-  });
-  const [autoSubmitted, setAutoSubmitted] = useState(false);
-  const [selectedDeal, setSelectedDeal] = useState<DealData | null>(null);
-  const [isSubmittingTicket, setIsSubmittingTicket] = useState(false);
+  const {
+    currentStep,
+    formData,
+    autoSubmitted,
+    selectedDeal,
+    isSubmittingTicket,
+    setFormData,
+    setAutoSubmitted,
+    setSelectedDeal,
+    setIsSubmittingTicket,
+    goToStep,
+    resetForm,
+  } = useTicketFormState();
 
   const {
     searchResult,
@@ -33,23 +34,6 @@ const SupportTicketForm = () => {
     resetSearch
   } = useHubSpotSearch();
 
-  // UTM parameter detection and auto-population
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const email = urlParams.get('email');
-    const phone = urlParams.get('phone');
-
-    if (email) {
-      setFormData({ method: "email", value: email });
-      setAutoSubmitted(true);
-      handleSubmit("email", email);
-    } else if (phone) {
-      setFormData({ method: "phone", value: phone });
-      setAutoSubmitted(true);
-      handleSubmit("phone", phone);
-    }
-  }, []);
-
   const handleSubmit = async (method: IdentificationMethod, value: string) => {
     const result = await searchContact(method, value);
     
@@ -59,24 +43,24 @@ const SupportTicketForm = () => {
         searchTickets(result.contact.contactId),
         searchDeals(result.contact.contactId)
       ]);
-      setCurrentStep(2);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      // If contact not found, stay on step 1 to show error inline
-      setCurrentStep(1);
+      goToStep(2);
     }
   };
 
+  // URL parameter detection and auto-population
+  useUrlParams({
+    onAutoSubmit: handleSubmit,
+    setFormData,
+    setAutoSubmitted,
+  });
+
   const handleDealClick = (deal: DealData) => {
     setSelectedDeal(deal);
-    setCurrentStep(4);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    goToStep(4);
   };
 
   const handleNewTicket = () => {
-    // Go to step 3 to select installation/deal
-    setCurrentStep(3);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    goToStep(3);
   };
 
   const handleTicketClick = (ticket: TicketData) => {
@@ -85,20 +69,17 @@ const SupportTicketForm = () => {
   };
 
   const handleTryAgain = () => {
-    setCurrentStep(1);
+    resetForm();
     resetSearch();
-    setFormData({ method: "phone", value: "" });
   };
 
   const handleBackToTickets = () => {
-    setCurrentStep(2);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    goToStep(2);
   };
 
   const handleBackToDeals = () => {
-    setCurrentStep(3);
     setSelectedDeal(null);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    goToStep(3);
   };
 
   const handleTicketSubmit = async (description: string, files: File[]) => {
@@ -110,11 +91,9 @@ const SupportTicketForm = () => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // For now, just reset to initial state
-      setCurrentStep(1);
+      // Reset to initial state
+      resetForm();
       resetSearch();
-      setFormData({ method: "phone", value: "" });
-      setSelectedDeal(null);
     } catch (error) {
       console.error('Error creating ticket:', error);
     } finally {
@@ -146,74 +125,26 @@ const SupportTicketForm = () => {
           {/* Progress indicator at top */}
           <ProgressIndicator currentStep={currentStep} totalSteps={currentStep === 4 ? 4 : 3} />
           
-          {/* Step 1: Contact Search */}
-          <div className={`form-step ${currentStep === 1 ? 'active' : ''}`}>
-            {currentStep === 1 && (
-              <ContactSearch
-                onSubmit={handleSubmit}
-                isLoading={isLoading}
-                autoSubmitted={autoSubmitted}
-                initialFormData={formData}
-                searchResult={searchResult}
-              />
-            )}
-          </div>
-
-          {/* Step 2: Tickets List */}
-          {currentStep === 2 && searchResult?.found && (
-            <>
-              <TicketsList
-                tickets={tickets}
-                isLoading={ticketsLoading}
-                onTicketClick={handleTicketClick}
-              />
-              
-              {/* New Ticket Button */}
-              <div className="pt-4 border-t">
-                <Button
-                  onClick={handleNewTicket}
-                  className="w-full h-12 text-base font-medium"
-                  variant="outline"
-                >
-                  <Plus className="mr-2 h-5 w-5" />
-                  Nouvelle demande
-                </Button>
-              </div>
-            </>
-          )}
-
-          {/* Step 3: Deals List */}
-          {currentStep === 3 && searchResult?.found && (
-            <>
-              <DealsList
-                deals={deals}
-                isLoading={dealsLoading}
-                onDealClick={handleDealClick}
-              />
-              
-              {/* Back Button */}
-              <div className="pt-4 border-t">
-                <Button
-                  onClick={handleBackToTickets}
-                  className="w-full h-12 text-base font-medium"
-                  variant="outline"
-                >
-                  <ArrowLeft className="mr-2 h-5 w-5" />
-                  Retour
-                </Button>
-              </div>
-            </>
-          )}
-
-          {/* Step 4: Ticket Creation Form */}
-          {currentStep === 4 && selectedDeal && (
-            <TicketCreationForm
-              deal={selectedDeal}
-              onSubmit={handleTicketSubmit}
-              onBack={handleBackToDeals}
-              isSubmitting={isSubmittingTicket}
-            />
-          )}
+          <StepRenderer
+            currentStep={currentStep}
+            formData={formData}
+            autoSubmitted={autoSubmitted}
+            selectedDeal={selectedDeal}
+            isSubmittingTicket={isSubmittingTicket}
+            searchResult={searchResult}
+            tickets={tickets}
+            ticketsLoading={ticketsLoading}
+            deals={deals}
+            dealsLoading={dealsLoading}
+            isLoading={isLoading}
+            onSubmit={handleSubmit}
+            onNewTicket={handleNewTicket}
+            onTicketClick={handleTicketClick}
+            onDealClick={handleDealClick}
+            onBackToTickets={handleBackToTickets}
+            onBackToDeals={handleBackToDeals}
+            onTicketSubmit={handleTicketSubmit}
+          />
         </CardContent>
       </Card>
     </div>
