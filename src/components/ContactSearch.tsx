@@ -208,7 +208,7 @@ const ContactSearch = ({ onSubmit, isLoading, autoSubmitted, initialFormData, se
               <div className="flex items-center space-x-2 text-red-600 text-sm">
                 <AlertCircle className="h-4 w-4" />
                 <span>
-                  {searchResult.message || searchResult.error || 'Aucun contact trouvé avec les informations fournies.'}
+                  {searchResult.message || searchResult.error || 'Aucun client trouvé avec les informations fournies.'}
                 </span>
               </div>
             )}

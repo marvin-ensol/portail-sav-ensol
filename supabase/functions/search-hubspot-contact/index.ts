@@ -120,7 +120,7 @@ serve(async (req) => {
     } else {
       return new Response(JSON.stringify({
         found: false,
-        message: `No contact found with the provided ${method === 'phone' ? 'phone number' : 'email address'}`
+        message: `Aucun client trouvé avec ${method === 'phone' ? 'le numéro fourni' : 'l\'adresse email fournie'}`
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
