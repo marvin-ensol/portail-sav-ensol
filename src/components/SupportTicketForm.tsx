@@ -183,7 +183,7 @@ const SupportTicketForm = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--gradient-sunset)' }}>
-      <Card className="form-card w-full max-w-md mx-auto bg-white/95 backdrop-blur-sm">
+      <Card className="form-card w-full max-w-md mx-auto bg-white/95 backdrop-blur-sm min-h-[500px]">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Support Ensol</CardTitle>
           <CardDescription>
@@ -232,9 +232,6 @@ const SupportTicketForm = () => {
             {(formData.method || autoSubmitted) && selectedOption && (
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="identification" className="text-sm font-medium">
-                    Saisissez votre {selectedOption.title.toLowerCase()}
-                  </Label>
                   <div className="relative">
                     <Input
                       id="identification"
