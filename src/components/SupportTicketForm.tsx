@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +24,7 @@ const SupportTicketForm = () => {
   const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
   const [emailSuggestions, setEmailSuggestions] = useState<string[]>([]);
   const [searchResult, setSearchResult] = useState<{found: boolean; contact?: any; message?: string; error?: string} | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // UTM parameter detection and auto-population
   useEffect(() => {
@@ -39,6 +40,11 @@ const SupportTicketForm = () => {
       setFormData({ method: "phone", value: phone });
       setAutoSubmitted(true);
       handleSubmit("phone", phone);
+    } else {
+      // Auto-focus the input field if no UTM parameters
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
     }
   }, []);
 
@@ -234,6 +240,7 @@ const SupportTicketForm = () => {
                 <div className="space-y-4">
                   <div className="relative">
                     <Input
+                      ref={inputRef}
                       id="identification"
                       type={selectedOption.inputType}
                       placeholder={selectedOption.placeholder}
