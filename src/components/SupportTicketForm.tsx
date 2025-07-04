@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Phone, Mail, Laptop, Loader2, CheckCircle } from "lucide-react";
 
-type IdentificationMethod = "phone" | "email" | "projectId";
+type IdentificationMethod = "phone" | "email";
 
 interface FormData {
   method: IdentificationMethod | null;
@@ -26,7 +26,6 @@ const SupportTicketForm = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const email = urlParams.get('email');
     const phone = urlParams.get('phone');
-    const id = urlParams.get('id');
 
     if (email) {
       setFormData({ method: "email", value: email });
@@ -36,37 +35,41 @@ const SupportTicketForm = () => {
       setFormData({ method: "phone", value: phone });
       setAutoSubmitted(true);
       handleSubmit("phone", phone);
-    } else if (id) {
-      setFormData({ method: "projectId", value: id });
-      setAutoSubmitted(true);
-      handleSubmit("projectId", id);
     }
   }, []);
+
+  const formatPhoneNumber = (value: string) => {
+    // Remove all non-digit characters
+    const digits = value.replace(/\D/g, '');
+    
+    // Limit to 10 digits for French format
+    const limitedDigits = digits.slice(0, 10);
+    
+    // Format as XX XX XX XX XX
+    const formatted = limitedDigits.replace(/(\d{2})(?=\d)/g, '$1 ').trim();
+    
+    return formatted;
+  };
+
+  const validatePhoneNumber = (phone: string) => {
+    const digits = phone.replace(/\D/g, '');
+    return digits.length === 10;
+  };
 
   const identificationOptions = [
     {
       id: "phone" as const,
-      title: "Phone Number",
-      description: "We'll send you a verification code",
+      title: "Numéro de téléphone",
       icon: Phone,
-      placeholder: "+1 (555) 123-4567",
+      placeholder: "06 12 34 56 78",
       inputType: "tel",
     },
     {
       id: "email" as const,
-      title: "Email Address",
-      description: "We'll send you a verification link",
+      title: "Adresse email",
       icon: Mail,
-      placeholder: "your.email@example.com",
+      placeholder: "votre.email@exemple.com",
       inputType: "email",
-    },
-    {
-      id: "projectId" as const,
-      title: "Project ID",
-      description: "Found in your dashboard",
-      icon: Laptop,
-      placeholder: "proj_1234567890",
-      inputType: "text",
     },
   ];
 
@@ -75,7 +78,14 @@ const SupportTicketForm = () => {
   };
 
   const handleInputChange = (value: string) => {
-    setFormData(prev => ({ ...prev, value }));
+    let processedValue = value;
+    
+    // Format phone number if phone method is selected
+    if (formData.method === "phone") {
+      processedValue = formatPhoneNumber(value);
+    }
+    
+    setFormData(prev => ({ ...prev, value: processedValue }));
   };
 
   const handleSubmit = async (method?: IdentificationMethod, value?: string) => {
@@ -100,11 +110,11 @@ const SupportTicketForm = () => {
     <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--gradient-sunset)' }}>
       <Card className="form-card w-full max-w-md mx-auto bg-white/95 backdrop-blur-sm">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Support Ticket</CardTitle>
+          <CardTitle className="text-2xl font-bold">Support Ensol</CardTitle>
           <CardDescription>
             {autoSubmitted 
-              ? "Auto-detecting your information..." 
-              : "Let's identify you to get started"
+              ? "Détection automatique de vos informations..." 
+              : "Envoi d'une nouvelle demande"
             }
           </CardDescription>
         </CardHeader>
@@ -114,7 +124,7 @@ const SupportTicketForm = () => {
           <div className={`form-step ${currentStep === 1 ? 'active' : ''}`}>
             {!autoSubmitted && (
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold mb-4">How would you like to identify yourself?</h3>
+                <h3 className="text-lg font-semibold mb-4">Comment aimeriez-vous vous identifier ?</h3>
                 <div className="grid gap-3">
                   {identificationOptions.map((option) => {
                     const IconComponent = option.icon;
@@ -128,9 +138,6 @@ const SupportTicketForm = () => {
                           <IconComponent className="h-5 w-5 text-primary" />
                           <div className="flex-1">
                             <div className="font-medium">{option.title}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {option.description}
-                            </div>
                           </div>
                           {formData.method === option.id && (
                             <CheckCircle className="h-5 w-5 text-primary" />
@@ -148,7 +155,7 @@ const SupportTicketForm = () => {
               <div className="space-y-4 mt-6">
                 <div className="space-y-2">
                   <Label htmlFor="identification">
-                    Enter your {selectedOption.title.toLowerCase()}
+                    Saisissez votre {selectedOption.title.toLowerCase()}
                   </Label>
                   <Input
                     id="identification"
@@ -164,7 +171,11 @@ const SupportTicketForm = () => {
                 {!autoSubmitted && (
                   <Button
                     onClick={() => handleSubmit()}
-                    disabled={!formData.value.trim() || isLoading}
+                    disabled={
+                      !formData.value.trim() || 
+                      isLoading || 
+                      (formData.method === "phone" && !validatePhoneNumber(formData.value))
+                    }
                     variant="sunset"
                     className="w-full"
                     style={{ background: 'var(--gradient-primary)' }}
@@ -172,10 +183,10 @@ const SupportTicketForm = () => {
                     {isLoading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 loading-spinner" />
-                        Verifying...
+                        Vérification...
                       </>
                     ) : (
-                      'Continue'
+                      'Continuer'
                     )}
                   </Button>
                 )}
@@ -184,7 +195,7 @@ const SupportTicketForm = () => {
                   <div className="text-center">
                     <Loader2 className="mx-auto h-8 w-8 loading-spinner text-primary" />
                     <p className="text-sm text-muted-foreground mt-2">
-                      Automatically verifying your information...
+                      Vérification automatique de vos informations...
                     </p>
                   </div>
                 )}
