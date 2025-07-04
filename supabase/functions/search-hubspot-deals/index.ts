@@ -78,7 +78,11 @@ serve(async (req) => {
         'closedate',
         'createdate',
         'pipeline',
-        'dealtype'
+        'dealtype',
+        'address',
+        'postcode',
+        'date_entered__installation_done_',
+        'products'
       ]
     }
 
@@ -110,7 +114,11 @@ serve(async (req) => {
       closeDate: deal.properties.closedate || null,
       createdDate: deal.properties.createdate || null,
       pipeline: deal.properties.pipeline || 'default',
-      dealType: deal.properties.dealtype || null
+      dealType: deal.properties.dealtype || null,
+      address: deal.properties.address || '',
+      postcode: deal.properties.postcode || '',
+      dateEnteredInstallationDone: deal.properties.date_entered__installation_done_ || null,
+      products: deal.properties.products ? deal.properties.products.split(';') : []
     })) || []
 
     console.log(`Successfully fetched ${deals.length} deals`)

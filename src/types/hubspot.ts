@@ -25,6 +25,10 @@ export interface DealData {
   createdDate: string | null;
   pipeline: string;
   dealType: string | null;
+  address: string;
+  postcode: string;
+  dateEnteredInstallationDone: string | null;
+  products: string[];
 }
 
 export interface ContactData {
