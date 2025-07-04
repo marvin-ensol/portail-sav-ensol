@@ -2,20 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Phone, Mail, Loader2, AlertCircle } from "lucide-react";
-
-type IdentificationMethod = "phone" | "email";
-
-interface FormData {
-  method: IdentificationMethod | null;
-  value: string;
-}
-
-interface SearchResult {
-  found: boolean;
-  contact?: any;
-  message?: string;
-  error?: string;
-}
+import type { FormData, IdentificationMethod, SearchResult } from "@/types/hubspot";
 
 interface ContactSearchProps {
   onSubmit: (method: IdentificationMethod, value: string) => void;

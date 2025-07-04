@@ -1,15 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Ticket, Clock, Loader2 } from "lucide-react";
-
-interface TicketData {
-  id: string;
-  ticketId: string;
-  subject: string;
-  status: string;
-  priority: string;
-  createdDate: string | null;
-  lastModified: string | null;
-}
+import type { TicketData } from "@/types/hubspot";
 
 interface TicketsListProps {
   tickets: TicketData[];

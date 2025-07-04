@@ -1,56 +1,13 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
 import { Plus } from "lucide-react";
 import ContactSearch from "./ContactSearch";
 import TicketsList from "./TicketsList";
 import DealsList from "./DealsList";
 import ProgressIndicator from "./ProgressIndicator";
-
-type IdentificationMethod = "phone" | "email";
-
-interface FormData {
-  method: IdentificationMethod | null;
-  value: string;
-}
-
-interface TicketData {
-  id: string;
-  ticketId: string;
-  subject: string;
-  status: string;
-  priority: string;
-  createdDate: string | null;
-  lastModified: string | null;
-}
-
-interface DealData {
-  id: string;
-  dealId: string;
-  name: string;
-  stage: string;
-  amount: string;
-  closeDate: string | null;
-  createdDate: string | null;
-  pipeline: string;
-  dealType: string | null;
-}
-
-interface ContactData {
-  contactId: string;
-  fullName: string;
-  firstname?: string;
-  email?: string;
-  phone?: string;
-}
-
-interface SearchResult {
-  found: boolean;
-  contact?: ContactData;
-  message?: string;
-  error?: string;
-}
+import { useHubSpotSearch } from "@/hooks/useHubSpotSearch";
+import type { FormData, IdentificationMethod, TicketData, DealData } from "@/types/hubspot";
 
 const SupportTicketForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -58,13 +15,20 @@ const SupportTicketForm = () => {
     method: "phone",
     value: "",
   });
-  const [isLoading, setIsLoading] = useState(false);
   const [autoSubmitted, setAutoSubmitted] = useState(false);
-  const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
-  const [tickets, setTickets] = useState<TicketData[]>([]);
-  const [ticketsLoading, setTicketsLoading] = useState(false);
-  const [deals, setDeals] = useState<DealData[]>([]);
-  const [dealsLoading, setDealsLoading] = useState(false);
+
+  const {
+    searchResult,
+    tickets,
+    ticketsLoading,
+    deals,
+    dealsLoading,
+    isLoading,
+    searchContact,
+    searchTickets,
+    searchDeals,
+    resetSearch
+  } = useHubSpotSearch();
 
   // UTM parameter detection and auto-population
   useEffect(() => {
@@ -84,107 +48,18 @@ const SupportTicketForm = () => {
   }, []);
 
   const handleSubmit = async (method: IdentificationMethod, value: string) => {
-    if (!method || !value.trim()) return;
-
-    setIsLoading(true);
-    setSearchResult(null);
-
-    try {
-      console.log('Starting HubSpot search with:', { method, value });
-      
-      const { data, error } = await supabase.functions.invoke('search-hubspot-contact', {
-        body: {
-          method,
-          value
-        }
-      });
-
-      console.log('Supabase function response:', { data, error });
-
-      if (error) {
-        console.error('Supabase function error:', error);
-        throw error;
-      }
-
-      console.log('Search result:', data);
-      setSearchResult(data);
-      
-      // If contact found, search for tickets and go to step 2
-      if (data.found && data.contact) {
-        await searchTickets(data.contact.contactId);
-        await searchDeals(data.contact.contactId);
-        setCurrentStep(2);
-      } else {
-        // If contact not found, stay on step 1 to show error inline
-        setCurrentStep(1);
-      }
-    } catch (error) {
-      console.error('Error searching contact:', error);
-      setSearchResult({
-        found: false,
-        error: 'Failed to search for contact. Please try again.'
-      });
+    const result = await searchContact(method, value);
+    
+    // If contact found, search for tickets and deals, then go to step 2
+    if (result?.found && result.contact) {
+      await Promise.all([
+        searchTickets(result.contact.contactId),
+        searchDeals(result.contact.contactId)
+      ]);
+      setCurrentStep(2);
+    } else {
+      // If contact not found, stay on step 1 to show error inline
       setCurrentStep(1);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const searchTickets = async (contactId: string) => {
-    setTicketsLoading(true);
-    setTickets([]);
-
-    try {
-      console.log('Searching tickets for contact ID:', contactId);
-      
-      const { data, error } = await supabase.functions.invoke('search-hubspot-tickets', {
-        body: { contactId }
-      });
-
-      console.log('Tickets search response:', { data, error });
-
-      if (error) {
-        console.error('Supabase function error:', error);
-        return;
-      }
-
-      if (data.success && data.tickets) {
-        setTickets(data.tickets);
-        console.log(`Found ${data.tickets.length} tickets`);
-      }
-    } catch (error) {
-      console.error('Error searching tickets:', error);
-    } finally {
-      setTicketsLoading(false);
-    }
-  };
-
-  const searchDeals = async (contactId: string) => {
-    setDealsLoading(true);
-    setDeals([]);
-
-    try {
-      console.log('Searching deals for contact ID:', contactId);
-      
-      const { data, error } = await supabase.functions.invoke('search-hubspot-deals', {
-        body: { contactId }
-      });
-
-      console.log('Deals search response:', { data, error });
-
-      if (error) {
-        console.error('Supabase function error:', error);
-        return;
-      }
-
-      if (data.success && data.deals) {
-        setDeals(data.deals);
-        console.log(`Found ${data.deals.length} deals`);
-      }
-    } catch (error) {
-      console.error('Error searching deals:', error);
-    } finally {
-      setDealsLoading(false);
     }
   };
 
@@ -205,9 +80,7 @@ const SupportTicketForm = () => {
 
   const handleTryAgain = () => {
     setCurrentStep(1);
-    setSearchResult(null);
-    setTickets([]);
-    setDeals([]);
+    resetSearch();
     setFormData({ method: "phone", value: "" });
   };
 

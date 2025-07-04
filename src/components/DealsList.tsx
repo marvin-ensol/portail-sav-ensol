@@ -1,17 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Building2, Clock, Loader2, Euro } from "lucide-react";
-
-interface DealData {
-  id: string;
-  dealId: string;
-  name: string;
-  stage: string;
-  amount: string;
-  closeDate: string | null;
-  createdDate: string | null;
-  pipeline: string;
-  dealType: string | null;
-}
+import type { DealData } from "@/types/hubspot";
 
 interface DealsListProps {
   deals: DealData[];
