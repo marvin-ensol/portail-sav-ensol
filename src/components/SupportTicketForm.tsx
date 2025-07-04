@@ -109,8 +109,9 @@ const SupportTicketForm = () => {
       console.log('Search result:', data);
       setSearchResult(data);
       
-      // If contact found, search for deals and go to step 2
+      // If contact found, search for tickets and go to step 2
       if (data.found && data.contact) {
+        await searchTickets(data.contact.contactId);
         await searchDeals(data.contact.contactId);
         setCurrentStep(2);
       } else {
@@ -126,6 +127,35 @@ const SupportTicketForm = () => {
       setCurrentStep(1);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const searchTickets = async (contactId: string) => {
+    setTicketsLoading(true);
+    setTickets([]);
+
+    try {
+      console.log('Searching tickets for contact ID:', contactId);
+      
+      const { data, error } = await supabase.functions.invoke('search-hubspot-tickets', {
+        body: { contactId }
+      });
+
+      console.log('Tickets search response:', { data, error });
+
+      if (error) {
+        console.error('Supabase function error:', error);
+        return;
+      }
+
+      if (data.success && data.tickets) {
+        setTickets(data.tickets);
+        console.log(`Found ${data.tickets.length} tickets`);
+      }
+    } catch (error) {
+      console.error('Error searching tickets:', error);
+    } finally {
+      setTicketsLoading(false);
     }
   };
 
@@ -164,13 +194,19 @@ const SupportTicketForm = () => {
   };
 
   const handleNewTicket = () => {
-    // TODO: Navigate to new ticket creation
-    console.log('Creating new ticket');
+    // Go to step 3 to select installation/deal
+    setCurrentStep(3);
+  };
+
+  const handleTicketClick = (ticket: TicketData) => {
+    // TODO: Navigate to ticket details or handle ticket selection
+    console.log('Ticket clicked:', ticket);
   };
 
   const handleTryAgain = () => {
     setCurrentStep(1);
     setSearchResult(null);
+    setTickets([]);
     setDeals([]);
     setFormData({ method: "phone", value: "" });
   };
@@ -191,8 +227,8 @@ const SupportTicketForm = () => {
         </CardHeader>
         
         <CardContent className="space-y-6">
-          {/* Progress indicator at top - hidden on step 2 */}
-          {currentStep === 1 && <ProgressIndicator currentStep={currentStep} />}
+          {/* Progress indicator at top */}
+          <ProgressIndicator currentStep={currentStep} totalSteps={3} />
           
           {/* Step 1: Contact Search */}
           <div className={`form-step ${currentStep === 1 ? 'active' : ''}`}>
@@ -207,13 +243,13 @@ const SupportTicketForm = () => {
             )}
           </div>
 
-          {/* Step 2: Deals List */}
+          {/* Step 2: Tickets List */}
           {currentStep === 2 && searchResult?.found && (
             <>
-              <DealsList
-                deals={deals}
-                isLoading={dealsLoading}
-                onDealClick={handleDealClick}
+              <TicketsList
+                tickets={tickets}
+                isLoading={ticketsLoading}
+                onTicketClick={handleTicketClick}
               />
               
               {/* New Ticket Button */}
@@ -228,6 +264,15 @@ const SupportTicketForm = () => {
                 </Button>
               </div>
             </>
+          )}
+
+          {/* Step 3: Deals List */}
+          {currentStep === 3 && searchResult?.found && (
+            <DealsList
+              deals={deals}
+              isLoading={dealsLoading}
+              onDealClick={handleDealClick}
+            />
           )}
         </CardContent>
       </Card>
