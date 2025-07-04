@@ -198,8 +198,8 @@ const SupportTicketForm = () => {
           {/* Step 1: Method Selection */}
           <div className={`form-step ${currentStep === 1 ? 'active' : ''}`}>
             {!autoSubmitted && (
-              <div className="space-y-6">
-                <h3 className="text-lg font-semibold mb-4">Comment aimeriez-vous vous identifier ?</h3>
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Comment aimeriez-vous vous identifier ?</h3>
                 
                 {/* Tab System */}
                 <div className="flex bg-muted rounded-lg p-1 w-full">
@@ -228,69 +228,71 @@ const SupportTicketForm = () => {
               </div>
             )}
 
-            {/* Input Field - Always show when method is selected or auto-submitted */}
-            {(formData.method || autoSubmitted) && selectedOption && (
-              <div className="space-y-4">
-                <div className="relative">
-                  <Input
-                    id="identification"
-                    type={selectedOption.inputType}
-                    placeholder={selectedOption.placeholder}
-                    value={formData.value}
-                    onChange={(e) => handleInputChange(e.target.value)}
-                    className="w-full h-12 text-base"
-                    disabled={isLoading || autoSubmitted}
-                    onBlur={() => setTimeout(() => setShowEmailSuggestions(false), 200)}
-                  />
-                  
-                  {/* Email suggestions dropdown */}
-                  {showEmailSuggestions && formData.method === "email" && (
-                    <div className="absolute top-full left-0 right-0 bg-background border border-border rounded-md shadow-lg z-50 max-h-48 overflow-y-auto mt-1">
-                      {emailSuggestions.map((suggestion, index) => (
-                        <div
-                          key={index}
-                          className="px-3 py-2 hover:bg-accent hover:text-accent-foreground cursor-pointer text-sm border-b border-border last:border-b-0"
-                          onClick={() => handleEmailSuggestionSelect(suggestion)}
-                        >
-                          {suggestion}
-                        </div>
-                      ))}
+            {/* Input Field Container - Fixed Height to Prevent Resizing */}
+            <div className="min-h-[120px] flex flex-col justify-start">
+              {(formData.method || autoSubmitted) && selectedOption && (
+                <div className="space-y-4">
+                  <div className="relative">
+                    <Input
+                      id="identification"
+                      type={selectedOption.inputType}
+                      placeholder={selectedOption.placeholder}
+                      value={formData.value}
+                      onChange={(e) => handleInputChange(e.target.value)}
+                      className="w-full h-12 text-base"
+                      disabled={isLoading || autoSubmitted}
+                      onBlur={() => setTimeout(() => setShowEmailSuggestions(false), 200)}
+                    />
+                    
+                    {/* Email suggestions dropdown */}
+                    {showEmailSuggestions && formData.method === "email" && (
+                      <div className="absolute top-full left-0 right-0 bg-background border border-border rounded-md shadow-lg z-50 max-h-48 overflow-y-auto mt-1">
+                        {emailSuggestions.map((suggestion, index) => (
+                          <div
+                            key={index}
+                            className="px-3 py-2 hover:bg-accent hover:text-accent-foreground cursor-pointer text-sm border-b border-border last:border-b-0"
+                            onClick={() => handleEmailSuggestionSelect(suggestion)}
+                          >
+                            {suggestion}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {!autoSubmitted && (
+                    <Button
+                      onClick={() => handleSubmit()}
+                      disabled={
+                        !formData.value.trim() || 
+                        isLoading || 
+                        (formData.method === "phone" && !validatePhoneNumber(formData.value))
+                      }
+                      className="w-full h-12 text-base font-medium"
+                      style={{ background: 'var(--gradient-primary)' }}
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                          Vérification...
+                        </>
+                      ) : (
+                        'Continuer'
+                      )}
+                    </Button>
+                  )}
+
+                  {autoSubmitted && isLoading && (
+                    <div className="text-center py-4">
+                      <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
+                      <p className="text-sm text-muted-foreground mt-2">
+                        Vérification automatique de vos informations...
+                      </p>
                     </div>
                   )}
                 </div>
-
-                {!autoSubmitted && (
-                  <Button
-                    onClick={() => handleSubmit()}
-                    disabled={
-                      !formData.value.trim() || 
-                      isLoading || 
-                      (formData.method === "phone" && !validatePhoneNumber(formData.value))
-                    }
-                    className="w-full h-12 text-base font-medium"
-                    style={{ background: 'var(--gradient-primary)' }}
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        Vérification...
-                      </>
-                    ) : (
-                      'Continuer'
-                    )}
-                  </Button>
-                )}
-
-                {autoSubmitted && isLoading && (
-                  <div className="text-center py-4">
-                    <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Vérification automatique de vos informations...
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           {/* Step 2: Search Results */}
