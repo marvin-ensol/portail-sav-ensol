@@ -113,6 +113,13 @@ const ContactSearch = ({ onSubmit, isLoading, autoSubmitted, initialFormData, se
     if (formData.method === "phone") {
       processedValue = formatPhoneNumber(value);
       setShowEmailSuggestions(false);
+      
+      // Auto-submit when phone number is complete (10 digits)
+      if (validatePhoneNumber(processedValue)) {
+        setTimeout(() => {
+          onSubmit(formData.method!, processedValue);
+        }, 100);
+      }
     }
     
     if (formData.method === "email") {
@@ -127,6 +134,11 @@ const ContactSearch = ({ onSubmit, isLoading, autoSubmitted, initialFormData, se
   const handleEmailSuggestionSelect = (suggestion: string) => {
     setFormData(prev => ({ ...prev, value: suggestion }));
     setShowEmailSuggestions(false);
+    
+    // Auto-submit when email suggestion is selected
+    setTimeout(() => {
+      onSubmit(formData.method!, suggestion);
+    }, 100);
   };
 
   const handleSubmit = () => {
