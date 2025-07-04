@@ -1,9 +1,9 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Building2, Clock, ArrowLeft, Upload, X } from "lucide-react";
+import { Building2, Clock, ArrowLeft, Upload, X, Image } from "lucide-react";
 import type { DealData } from "@/types/hubspot";
 
 interface TicketCreationFormProps {
@@ -17,7 +17,17 @@ const TicketCreationForm = ({ deal, onSubmit, onBack, isSubmitting = false }: Ti
   const [description, setDescription] = useState("");
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+  const [previewUrls, setPreviewUrls] = useState<{ [key: number]: string }>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Clean up preview URLs when component unmounts
+  useEffect(() => {
+    return () => {
+      Object.values(previewUrls).forEach(url => {
+        URL.revokeObjectURL(url);
+      });
+    };
+  }, [previewUrls]);
 
   const formatInstallationDate = (dateString: string | null) => {
     if (!dateString) return 'Non encore installé';
@@ -49,11 +59,26 @@ const TicketCreationForm = ({ deal, onSubmit, onBack, isSubmitting = false }: Ti
     return colors[index % colors.length];
   };
 
+  const isImageFile = (file: File) => {
+    return file.type.startsWith('image/');
+  };
+
   const handleFileSelect = (files: FileList | null) => {
     if (!files) return;
     
     const newFiles = Array.from(files);
+    const startIndex = attachedFiles.length;
+    
+    // Create preview URLs for image files
+    const newPreviewUrls: { [key: number]: string } = {};
+    newFiles.forEach((file, index) => {
+      if (isImageFile(file)) {
+        newPreviewUrls[startIndex + index] = URL.createObjectURL(file);
+      }
+    });
+    
     setAttachedFiles(prev => [...prev, ...newFiles]);
+    setPreviewUrls(prev => ({ ...prev, ...newPreviewUrls }));
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -73,6 +98,16 @@ const TicketCreationForm = ({ deal, onSubmit, onBack, isSubmitting = false }: Ti
   };
 
   const removeFile = (index: number) => {
+    // Clean up preview URL if it exists
+    if (previewUrls[index]) {
+      URL.revokeObjectURL(previewUrls[index]);
+      setPreviewUrls(prev => {
+        const newUrls = { ...prev };
+        delete newUrls[index];
+        return newUrls;
+      });
+    }
+    
     setAttachedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
@@ -179,20 +214,53 @@ const TicketCreationForm = ({ deal, onSubmit, onBack, isSubmitting = false }: Ti
 
           {/* Attached Files */}
           {attachedFiles.length > 0 && (
-            <div className="space-y-2">
+            <div className="space-y-3">
               <p className="text-sm font-medium">Fichiers sélectionnés :</p>
-              <div className="space-y-1">
+              <div className="grid grid-cols-2 gap-3">
                 {attachedFiles.map((file, index) => (
-                  <div key={index} className="flex items-center justify-between bg-muted p-2 rounded">
-                    <span className="text-sm truncate">{file.name}</span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeFile(index)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
+                  <div key={index} className="relative bg-muted p-3 rounded-lg">
+                    {isImageFile(file) && previewUrls[index] ? (
+                      <div className="space-y-2">
+                        <div className="relative">
+                          <img
+                            src={previewUrls[index]}
+                            alt={file.name}
+                            className="w-full h-20 object-cover rounded"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                            onClick={() => removeFile(index)}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                        <p className="text-xs text-muted-foreground truncate">{file.name}</p>
+                      </div>
+                    ) : (
+                      <div className="flex items-center space-x-2">
+                        <div className="flex-shrink-0">
+                          <Image className="h-8 w-8 text-muted-foreground" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm truncate">{file.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {(file.size / 1024).toFixed(1)} KB
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0"
+                          onClick={() => removeFile(index)}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

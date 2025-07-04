@@ -60,6 +60,7 @@ const SupportTicketForm = () => {
         searchDeals(result.contact.contactId)
       ]);
       setCurrentStep(2);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
       // If contact not found, stay on step 1 to show error inline
       setCurrentStep(1);
@@ -69,11 +70,13 @@ const SupportTicketForm = () => {
   const handleDealClick = (deal: DealData) => {
     setSelectedDeal(deal);
     setCurrentStep(4);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleNewTicket = () => {
     // Go to step 3 to select installation/deal
     setCurrentStep(3);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleTicketClick = (ticket: TicketData) => {
@@ -89,11 +92,13 @@ const SupportTicketForm = () => {
 
   const handleBackToTickets = () => {
     setCurrentStep(2);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleBackToDeals = () => {
     setCurrentStep(3);
     setSelectedDeal(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleTicketSubmit = async (description: string, files: File[]) => {
