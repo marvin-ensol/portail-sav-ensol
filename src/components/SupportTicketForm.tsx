@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Phone, Mail, Loader2, CheckCircle, User, AlertCircle } from "lucide-react";
+import { Phone, Mail, Loader2, CheckCircle, User, AlertCircle, Ticket, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 type IdentificationMethod = "phone" | "email";
@@ -11,6 +11,16 @@ type IdentificationMethod = "phone" | "email";
 interface FormData {
   method: IdentificationMethod | null;
   value: string;
+}
+
+interface TicketData {
+  id: string;
+  ticketId: string;
+  subject: string;
+  status: string;
+  priority: string;
+  createdDate: string | null;
+  lastModified: string | null;
 }
 
 const SupportTicketForm = () => {
@@ -24,6 +34,8 @@ const SupportTicketForm = () => {
   const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
   const [emailSuggestions, setEmailSuggestions] = useState<string[]>([]);
   const [searchResult, setSearchResult] = useState<{found: boolean; contact?: any; message?: string; error?: string} | null>(null);
+  const [tickets, setTickets] = useState<TicketData[]>([]);
+  const [ticketsLoading, setTicketsLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // UTM parameter detection and auto-population
@@ -172,6 +184,12 @@ const SupportTicketForm = () => {
 
       console.log('Search result:', data);
       setSearchResult(data);
+      
+      // If contact found, search for tickets
+      if (data.found && data.contact) {
+        await searchTickets(data.contact.contactId);
+      }
+      
       setCurrentStep(2);
     } catch (error) {
       console.error('Error searching contact:', error);
@@ -183,6 +201,40 @@ const SupportTicketForm = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const searchTickets = async (contactId: string) => {
+    setTicketsLoading(true);
+    setTickets([]);
+
+    try {
+      console.log('Searching tickets for contact ID:', contactId);
+      
+      const { data, error } = await supabase.functions.invoke('search-hubspot-tickets', {
+        body: { contactId }
+      });
+
+      console.log('Tickets search response:', { data, error });
+
+      if (error) {
+        console.error('Supabase function error:', error);
+        return;
+      }
+
+      if (data.success && data.tickets) {
+        setTickets(data.tickets);
+        console.log(`Found ${data.tickets.length} tickets`);
+      }
+    } catch (error) {
+      console.error('Error searching tickets:', error);
+    } finally {
+      setTicketsLoading(false);
+    }
+  };
+
+  const handleTicketClick = (ticket: TicketData) => {
+    // TODO: Navigate to ticket details or handle ticket selection
+    console.log('Ticket clicked:', ticket);
   };
 
   const selectedOption = identificationOptions.find(opt => opt.id === formData.method);
@@ -304,26 +356,90 @@ const SupportTicketForm = () => {
 
           {/* Step 2: Search Results */}
           {currentStep === 2 && searchResult && (
-            <div className="space-y-4">
+            <div className="space-y-6">
               {searchResult.found && searchResult.contact ? (
-                <div className="text-center space-y-4">
-                  <div className="flex items-center justify-center space-x-2 text-green-600">
-                    <User className="h-6 w-6" />
-                    <span className="text-lg font-semibold">Contact trouvé !</span>
+                <div className="space-y-6">
+                  <div className="text-center space-y-4">
+                    <div className="flex items-center justify-center space-x-2 text-green-600">
+                      <User className="h-6 w-6" />
+                      <span className="text-lg font-semibold">Contact trouvé !</span>
+                    </div>
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <h3 className="text-xl font-bold text-green-800">
+                        {searchResult.contact.fullName}
+                      </h3>
+                      {searchResult.contact.email && (
+                        <p className="text-green-700 mt-1">
+                          📧 {searchResult.contact.email}
+                        </p>
+                      )}
+                      {searchResult.contact.phone && (
+                        <p className="text-green-700 mt-1">
+                          📱 {searchResult.contact.phone}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <h3 className="text-xl font-bold text-green-800">
-                      {searchResult.contact.fullName}
+
+                  {/* Tickets Section */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-center">
+                      Donner suite à une demande existante
                     </h3>
-                    {searchResult.contact.email && (
-                      <p className="text-green-700 mt-1">
-                        📧 {searchResult.contact.email}
-                      </p>
-                    )}
-                    {searchResult.contact.phone && (
-                      <p className="text-green-700 mt-1">
-                        📱 {searchResult.contact.phone}
-                      </p>
+                    
+                    {ticketsLoading ? (
+                      <div className="text-center py-4">
+                        <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
+                        <p className="text-sm text-muted-foreground mt-2">
+                          Recherche de vos demandes...
+                        </p>
+                      </div>
+                    ) : tickets.length > 0 ? (
+                      <div className="space-y-3">
+                        {tickets.map((ticket) => (
+                          <Card 
+                            key={ticket.id} 
+                            className="cursor-pointer hover:shadow-md transition-shadow duration-200 border-l-4 border-l-primary"
+                            onClick={() => handleTicketClick(ticket)}
+                          >
+                            <CardContent className="p-4">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center space-x-2 mb-2">
+                                    <Ticket className="h-4 w-4 text-primary" />
+                                    <span className="text-sm font-medium text-muted-foreground">
+                                      #{ticket.ticketId}
+                                    </span>
+                                  </div>
+                                  <h4 className="font-semibold text-foreground mb-1">
+                                    {ticket.subject}
+                                  </h4>
+                                  <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                                    <Clock className="h-3 w-3" />
+                                    <span>Statut: {ticket.status}</span>
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                    ticket.priority === 'high' 
+                                      ? 'bg-red-100 text-red-800' 
+                                      : ticket.priority === 'medium'
+                                      ? 'bg-yellow-100 text-yellow-800'
+                                      : 'bg-green-100 text-green-800'
+                                  }`}>
+                                    {ticket.priority}
+                                  </div>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-6 text-muted-foreground">
+                        <Ticket className="mx-auto h-12 w-12 mb-3 opacity-50" />
+                        <p>Aucuns tickets existants</p>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -342,6 +458,7 @@ const SupportTicketForm = () => {
                     onClick={() => {
                       setCurrentStep(1);
                       setSearchResult(null);
+                      setTickets([]);
                       setFormData({ method: "phone", value: "" });
                     }}
                     variant="outline"
