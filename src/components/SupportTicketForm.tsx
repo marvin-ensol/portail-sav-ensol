@@ -84,6 +84,10 @@ const SupportTicketForm = () => {
     setFormData({ method: "phone", value: "" });
   };
 
+  const handleBackToTickets = () => {
+    setCurrentStep(2);
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#f5f7ff' }}>
       <Card className="form-card w-full max-w-md mx-auto bg-white/95 backdrop-blur-sm">
@@ -95,7 +99,10 @@ const SupportTicketForm = () => {
             }
           </CardTitle>
           <CardDescription>
-            Suivi de vos demandes d'assistance
+            {currentStep === 3 
+              ? "Envoi d'une nouvelle demande"
+              : "Suivi de vos demandes d'assistance"
+            }
           </CardDescription>
         </CardHeader>
         
@@ -141,11 +148,24 @@ const SupportTicketForm = () => {
 
           {/* Step 3: Deals List */}
           {currentStep === 3 && searchResult?.found && (
-            <DealsList
-              deals={deals}
-              isLoading={dealsLoading}
-              onDealClick={handleDealClick}
-            />
+            <>
+              <DealsList
+                deals={deals}
+                isLoading={dealsLoading}
+                onDealClick={handleDealClick}
+              />
+              
+              {/* Back Button */}
+              <div className="pt-4 border-t">
+                <Button
+                  onClick={handleBackToTickets}
+                  className="w-full h-12 text-base font-medium"
+                  variant="outline"
+                >
+                  Retour
+                </Button>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
