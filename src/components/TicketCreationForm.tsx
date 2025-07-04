@@ -1,9 +1,12 @@
-import { useState, useRef, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Building2, Clock, ArrowLeft, Upload, X, Image } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import DealInfoCard from "./DealInfoCard";
+import FileUploadArea from "./FileUploadArea";
+import FileAttachmentList from "./FileAttachmentList";
+import { useFileUpload } from "@/hooks/useFileUpload";
 import type { DealData } from "@/types/hubspot";
 
 interface TicketCreationFormProps {
@@ -15,101 +18,18 @@ interface TicketCreationFormProps {
 
 const TicketCreationForm = ({ deal, onSubmit, onBack, isSubmitting = false }: TicketCreationFormProps) => {
   const [description, setDescription] = useState("");
-  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
-  const [isDragging, setIsDragging] = useState(false);
-  const [previewUrls, setPreviewUrls] = useState<{ [key: number]: string }>({});
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Clean up preview URLs when component unmounts
-  useEffect(() => {
-    return () => {
-      Object.values(previewUrls).forEach(url => {
-        URL.revokeObjectURL(url);
-      });
-    };
-  }, [previewUrls]);
-
-  const formatInstallationDate = (dateString: string | null) => {
-    if (!dateString) return 'Non encore installé';
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('fr-FR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: '2-digit'
-      });
-    } catch {
-      return 'Date invalide';
-    }
-  };
-
-  const transformProductName = (product: string) => {
-    return product === 'PV' ? 'Panneaux' : product;
-  };
-
-  const getProductBadgeColor = (product: string, index: number) => {
-    const colors = [
-      'bg-blue-100 text-blue-700',
-      'bg-purple-100 text-purple-700', 
-      'bg-pink-100 text-pink-700',
-      'bg-orange-100 text-orange-700',
-      'bg-green-100 text-green-700',
-      'bg-indigo-100 text-indigo-700'
-    ];
-    return colors[index % colors.length];
-  };
-
-  const isImageFile = (file: File) => {
-    return file.type.startsWith('image/');
-  };
-
-  const handleFileSelect = (files: FileList | null) => {
-    if (!files) return;
-    
-    const newFiles = Array.from(files);
-    const startIndex = attachedFiles.length;
-    
-    // Create preview URLs for image files
-    const newPreviewUrls: { [key: number]: string } = {};
-    newFiles.forEach((file, index) => {
-      if (isImageFile(file)) {
-        newPreviewUrls[startIndex + index] = URL.createObjectURL(file);
-      }
-    });
-    
-    setAttachedFiles(prev => [...prev, ...newFiles]);
-    setPreviewUrls(prev => ({ ...prev, ...newPreviewUrls }));
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    handleFileSelect(e.dataTransfer.files);
-  };
-
-  const removeFile = (index: number) => {
-    // Clean up preview URL if it exists
-    if (previewUrls[index]) {
-      URL.revokeObjectURL(previewUrls[index]);
-      setPreviewUrls(prev => {
-        const newUrls = { ...prev };
-        delete newUrls[index];
-        return newUrls;
-      });
-    }
-    
-    setAttachedFiles(prev => prev.filter((_, i) => i !== index));
-  };
+  
+  const {
+    attachedFiles,
+    isDragging,
+    previewUrls,
+    isImageFile,
+    handleFileSelect,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+    removeFile,
+  } = useFileUpload();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,44 +43,7 @@ const TicketCreationForm = ({ deal, onSubmit, onBack, isSubmitting = false }: Ti
       </h2>
 
       {/* Deal Information Card */}
-      <Card className="border-l-4 border-l-primary bg-muted/30">
-        <CardContent className="p-4">
-          <div className="space-y-3">
-            {/* Products badges */}
-            <div className="flex flex-wrap gap-1">
-              {deal.products.length > 0 ? (
-                deal.products.map((product, index) => (
-                  <span
-                    key={index}
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getProductBadgeColor(product, index)}`}
-                  >
-                    {transformProductName(product)}
-                  </span>
-                ))
-              ) : (
-                <span className="text-xs text-muted-foreground">Aucun produit spécifié</span>
-              )}
-            </div>
-            
-            {/* Address title with building icon */}
-            <div className="flex items-center space-x-2">
-              <Building2 className="h-4 w-4 text-primary" />
-              <h4 className="font-semibold text-foreground">
-                {deal.address && deal.postcode 
-                  ? `${deal.address}, ${deal.postcode}`
-                  : deal.name
-                }
-              </h4>
-            </div>
-            
-            {/* Installation date */}
-            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-              <Clock className="h-3 w-3" />
-              <span>Installation le {formatInstallationDate(deal.dateEnteredInstallationDone)}</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <DealInfoCard deal={deal} />
 
       {/* Ticket Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -178,95 +61,21 @@ const TicketCreationForm = ({ deal, onSubmit, onBack, isSubmitting = false }: Ti
         </div>
 
         {/* File Upload Area */}
-        <div className="space-y-2">
-          <Label>Pièces jointes</Label>
-          <div
-            className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-              isDragging 
-                ? 'border-primary bg-primary/5' 
-                : 'border-muted-foreground/25 hover:border-primary/50'
-            }`}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-          >
-            <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
-            <p className="text-sm text-muted-foreground mb-2">
-              Glissez-déposez vos fichiers ici ou
-            </p>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              Parcourir les fichiers
-            </Button>
-            <input
-              type="file"
-              ref={fileInputRef}
-              multiple
-              className="hidden"
-              onChange={(e) => handleFileSelect(e.target.files)}
-              accept="image/*,.pdf,.doc,.docx,.txt"
-            />
-          </div>
+        <FileUploadArea
+          isDragging={isDragging}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onFileSelect={handleFileSelect}
+        />
 
-          {/* Attached Files */}
-          {attachedFiles.length > 0 && (
-            <div className="space-y-3">
-              <p className="text-sm font-medium">Fichiers sélectionnés :</p>
-              <div className="grid grid-cols-2 gap-3">
-                {attachedFiles.map((file, index) => (
-                  <div key={index} className="relative bg-muted p-3 rounded-lg">
-                    {isImageFile(file) && previewUrls[index] ? (
-                      <div className="space-y-2">
-                        <div className="relative">
-                          <img
-                            src={previewUrls[index]}
-                            alt={file.name}
-                            className="w-full h-20 object-cover rounded"
-                          />
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="sm"
-                            className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
-                            onClick={() => removeFile(index)}
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                        <p className="text-xs text-muted-foreground truncate">{file.name}</p>
-                      </div>
-                    ) : (
-                      <div className="flex items-center space-x-2">
-                        <div className="flex-shrink-0">
-                          <Image className="h-8 w-8 text-muted-foreground" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm truncate">{file.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {(file.size / 1024).toFixed(1)} KB
-                          </p>
-                        </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="h-6 w-6 p-0"
-                          onClick={() => removeFile(index)}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+        {/* Attached Files */}
+        <FileAttachmentList
+          files={attachedFiles}
+          previewUrls={previewUrls}
+          isImageFile={isImageFile}
+          onRemoveFile={removeFile}
+        />
 
         {/* Action Buttons */}
         <div className="flex flex-col space-y-3">
