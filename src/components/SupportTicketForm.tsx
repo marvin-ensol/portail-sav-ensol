@@ -156,20 +156,15 @@ const SupportTicketForm = () => {
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#f5f7ff' }}>
       <Card className="form-card w-full max-w-md mx-auto bg-white/95 backdrop-blur-sm">
-        <CardHeader className="text-center" style={{ background: 'var(--gradient-header)' }}>
-          <CardTitle className="text-2xl font-bold text-white">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold gradient-text">
             {currentStep === 2 && searchResult?.found && searchResult.contact?.firstname 
               ? `Bonjour, ${searchResult.contact.firstname}` 
               : "Support Ensol"
             }
           </CardTitle>
-          <CardDescription className="text-white/90">
-            {currentStep === 2 && searchResult?.found 
-              ? "Choisissez une demande existante"
-              : autoSubmitted 
-                ? "Détection automatique de vos informations..." 
-                : "Envoi d'une nouvelle demande"
-            }
+          <CardDescription>
+            Suivi de vos demandes d'assistance
           </CardDescription>
         </CardHeader>
         
