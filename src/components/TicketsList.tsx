@@ -27,7 +27,7 @@ const TicketsList = ({ tickets, isLoading, onTicketClick }: TicketsListProps) =>
           {tickets.map((ticket) => (
             <Card 
               key={ticket.id} 
-              className="cursor-pointer hover:shadow-md transition-shadow duration-200 border-l-4 border-l-primary"
+              className="cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-200 border-l-4 border-l-primary"
               onClick={() => onTicketClick(ticket)}
             >
               <CardContent className="p-4">

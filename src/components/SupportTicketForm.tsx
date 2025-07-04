@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, ArrowLeft } from "lucide-react";
 import ContactSearch from "./ContactSearch";
 import TicketsList from "./TicketsList";
 import DealsList from "./DealsList";
@@ -162,6 +162,7 @@ const SupportTicketForm = () => {
                   className="w-full h-12 text-base font-medium"
                   variant="outline"
                 >
+                  <ArrowLeft className="mr-2 h-5 w-5" />
                   Retour
                 </Button>
               </div>
