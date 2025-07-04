@@ -165,6 +165,9 @@ const SupportTicketForm = () => {
         </CardHeader>
         
         <CardContent className="space-y-6">
+          {/* Progress indicator at top */}
+          <ProgressIndicator currentStep={currentStep} />
+          
           {/* Step 1: Contact Search */}
           <div className={`form-step ${currentStep === 1 ? 'active' : ''}`}>
             {currentStep === 1 && (
@@ -195,9 +198,6 @@ const SupportTicketForm = () => {
               )}
             </div>
           )}
-
-          {/* Progress indicator */}
-          <ProgressIndicator currentStep={currentStep} />
         </CardContent>
       </Card>
     </div>

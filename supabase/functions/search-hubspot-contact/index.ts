@@ -33,9 +33,24 @@ serve(async (req) => {
 
     if (method === 'phone') {
       searchProperty = 'mobilephone';
-      // Clean phone number for search (remove spaces)
-      searchValue = value.replace(/\s/g, '');
-      console.log('Phone search - original:', value, 'cleaned:', searchValue);
+      // Convert French phone number to E.164 format for HubSpot search
+      let cleanedPhone = value.replace(/\s/g, '');
+      
+      // If it's a French mobile number starting with 06, 07 (without +33)
+      if (cleanedPhone.match(/^0[67]/)) {
+        // Remove leading 0 and add +33
+        searchValue = '+33' + cleanedPhone.substring(1);
+      } 
+      // If it already has +33, use as is
+      else if (cleanedPhone.startsWith('+33')) {
+        searchValue = cleanedPhone;
+      }
+      // Otherwise, use the cleaned version
+      else {
+        searchValue = cleanedPhone;
+      }
+      
+      console.log('Phone search - original:', value, 'E.164 format:', searchValue);
     } else {
       searchProperty = 'email';
       console.log('Email search with:', searchValue);
@@ -92,6 +107,7 @@ serve(async (req) => {
       return new Response(JSON.stringify({
         found: true,
         contact: {
+          contactId: contact.id,
           id: contact.id,
           fullName: fullName || 'Contact',
           email: contact.properties.email || '',
