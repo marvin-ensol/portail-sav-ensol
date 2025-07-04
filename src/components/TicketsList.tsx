@@ -1,5 +1,7 @@
+import { useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Ticket, Clock, Loader2 } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { TicketData } from "@/types/hubspot";
 
 interface TicketsListProps {
@@ -9,11 +11,37 @@ interface TicketsListProps {
 }
 
 const TicketsList = ({ tickets, isLoading, onTicketClick }: TicketsListProps) => {
+  const [activeTab, setActiveTab] = useState<"ongoing" | "resolved">("ongoing");
+
+  const filteredAndSortedTickets = useMemo(() => {
+    // Filter tickets based on status
+    const filtered = tickets.filter(ticket => 
+      activeTab === "ongoing" ? ticket.status !== "4" : ticket.status === "4"
+    );
+
+    // Sort by creation date (most recent first)
+    return filtered.sort((a, b) => {
+      const dateA = new Date(a.createdDate || 0).getTime();
+      const dateB = new Date(b.createdDate || 0).getTime();
+      return dateB - dateA;
+    });
+  }, [tickets, activeTab]);
+
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold text-center">
         Donner suite à une demande existante
       </h3>
+      
+      {/* Status Toggle */}
+      <div className="flex justify-center">
+        <Tabs value={activeTab} onValueChange={(value: string) => setActiveTab(value as "ongoing" | "resolved")} className="w-full max-w-sm">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="ongoing">En cours</TabsTrigger>
+            <TabsTrigger value="resolved">Résolues</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
       
       {isLoading ? (
         <div className="text-center py-4">
@@ -22,9 +50,9 @@ const TicketsList = ({ tickets, isLoading, onTicketClick }: TicketsListProps) =>
             Recherche de vos demandes...
           </p>
         </div>
-      ) : tickets.length > 0 ? (
+      ) : filteredAndSortedTickets.length > 0 ? (
         <div className="space-y-3">
-          {tickets.map((ticket) => (
+          {filteredAndSortedTickets.map((ticket) => (
             <Card 
               key={ticket.id} 
               className="cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-200 border-l-4 border-l-primary"
@@ -66,7 +94,7 @@ const TicketsList = ({ tickets, isLoading, onTicketClick }: TicketsListProps) =>
       ) : (
         <div className="text-center py-6 text-muted-foreground">
           <Ticket className="mx-auto h-12 w-12 mb-3 opacity-50" />
-          <p>Aucuns tickets existants</p>
+          <p>{activeTab === "ongoing" ? "Aucunes demandes en cours" : "Aucunes demandes résolues"}</p>
         </div>
       )}
     </div>
