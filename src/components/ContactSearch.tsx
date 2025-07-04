@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Phone, Mail, Loader2 } from "lucide-react";
+import { Phone, Mail, Loader2, AlertCircle } from "lucide-react";
 
 type IdentificationMethod = "phone" | "email";
 
@@ -10,14 +10,22 @@ interface FormData {
   value: string;
 }
 
+interface SearchResult {
+  found: boolean;
+  contact?: any;
+  message?: string;
+  error?: string;
+}
+
 interface ContactSearchProps {
   onSubmit: (method: IdentificationMethod, value: string) => void;
   isLoading: boolean;
   autoSubmitted: boolean;
   initialFormData?: FormData;
+  searchResult?: SearchResult | null;
 }
 
-const ContactSearch = ({ onSubmit, isLoading, autoSubmitted, initialFormData }: ContactSearchProps) => {
+const ContactSearch = ({ onSubmit, isLoading, autoSubmitted, initialFormData, searchResult }: ContactSearchProps) => {
   const [formData, setFormData] = useState<FormData>(
     initialFormData || { method: "phone", value: "" }
   );
@@ -127,6 +135,7 @@ const ContactSearch = ({ onSubmit, isLoading, autoSubmitted, initialFormData }: 
   };
 
   const selectedOption = identificationOptions.find(opt => opt.id === formData.method);
+  const showError = searchResult && !searchResult.found && !isLoading;
 
   return (
     <div className="space-y-6">
@@ -173,7 +182,7 @@ const ContactSearch = ({ onSubmit, isLoading, autoSubmitted, initialFormData }: 
                 placeholder={selectedOption.placeholder}
                 value={formData.value}
                 onChange={(e) => handleInputChange(e.target.value)}
-                className="w-full h-12 text-base"
+                className={`w-full h-12 text-base ${showError ? 'border-red-500 focus:border-red-500' : ''}`}
                 disabled={isLoading || autoSubmitted}
                 onBlur={() => setTimeout(() => setShowEmailSuggestions(false), 200)}
               />
@@ -193,6 +202,16 @@ const ContactSearch = ({ onSubmit, isLoading, autoSubmitted, initialFormData }: 
                 </div>
               )}
             </div>
+
+            {/* Error message below input */}
+            {showError && (
+              <div className="flex items-center space-x-2 text-red-600 text-sm">
+                <AlertCircle className="h-4 w-4" />
+                <span>
+                  {searchResult.message || searchResult.error || 'Aucun contact trouvé avec les informations fournies.'}
+                </span>
+              </div>
+            )}
 
             {!autoSubmitted && (
               <Button

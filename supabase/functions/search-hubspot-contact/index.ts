@@ -110,6 +110,7 @@ serve(async (req) => {
           contactId: contact.id,
           id: contact.id,
           fullName: fullName || 'Contact',
+          firstname: contact.properties.firstname || '',
           email: contact.properties.email || '',
           phone: contact.properties.mobilephone || ''
         }
