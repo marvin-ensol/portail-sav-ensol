@@ -5,6 +5,7 @@ import { Plus, ArrowLeft } from "lucide-react";
 import ContactSearch from "./ContactSearch";
 import TicketsList from "./TicketsList";
 import DealsList from "./DealsList";
+import TicketCreationForm from "./TicketCreationForm";
 import ProgressIndicator from "./ProgressIndicator";
 import { useHubSpotSearch } from "@/hooks/useHubSpotSearch";
 import type { FormData, IdentificationMethod, TicketData, DealData } from "@/types/hubspot";
@@ -16,6 +17,8 @@ const SupportTicketForm = () => {
     value: "",
   });
   const [autoSubmitted, setAutoSubmitted] = useState(false);
+  const [selectedDeal, setSelectedDeal] = useState<DealData | null>(null);
+  const [isSubmittingTicket, setIsSubmittingTicket] = useState(false);
 
   const {
     searchResult,
@@ -64,8 +67,8 @@ const SupportTicketForm = () => {
   };
 
   const handleDealClick = (deal: DealData) => {
-    // TODO: Navigate to deal details or handle deal selection
-    console.log('Deal clicked:', deal);
+    setSelectedDeal(deal);
+    setCurrentStep(4);
   };
 
   const handleNewTicket = () => {
@@ -88,6 +91,32 @@ const SupportTicketForm = () => {
     setCurrentStep(2);
   };
 
+  const handleBackToDeals = () => {
+    setCurrentStep(3);
+    setSelectedDeal(null);
+  };
+
+  const handleTicketSubmit = async (description: string, files: File[]) => {
+    setIsSubmittingTicket(true);
+    try {
+      // TODO: Implement ticket creation API call
+      console.log('Creating ticket:', { description, files, deal: selectedDeal });
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // For now, just reset to initial state
+      setCurrentStep(1);
+      resetSearch();
+      setFormData({ method: "phone", value: "" });
+      setSelectedDeal(null);
+    } catch (error) {
+      console.error('Error creating ticket:', error);
+    } finally {
+      setIsSubmittingTicket(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#f5f7ff' }}>
       <Card className="form-card w-full max-w-md mx-auto bg-white/95 backdrop-blur-sm">
@@ -101,6 +130,8 @@ const SupportTicketForm = () => {
           <CardDescription>
             {currentStep === 3 
               ? "Envoi d'une nouvelle demande"
+              : currentStep === 4
+              ? "Envoi d'une nouvelle demande"
               : "Suivi de vos demandes d'assistance"
             }
           </CardDescription>
@@ -108,7 +139,7 @@ const SupportTicketForm = () => {
         
         <CardContent className="space-y-6">
           {/* Progress indicator at top */}
-          <ProgressIndicator currentStep={currentStep} totalSteps={3} />
+          <ProgressIndicator currentStep={currentStep} totalSteps={currentStep === 4 ? 4 : 3} />
           
           {/* Step 1: Contact Search */}
           <div className={`form-step ${currentStep === 1 ? 'active' : ''}`}>
@@ -167,6 +198,16 @@ const SupportTicketForm = () => {
                 </Button>
               </div>
             </>
+          )}
+
+          {/* Step 4: Ticket Creation Form */}
+          {currentStep === 4 && selectedDeal && (
+            <TicketCreationForm
+              deal={selectedDeal}
+              onSubmit={handleTicketSubmit}
+              onBack={handleBackToDeals}
+              isSubmitting={isSubmittingTicket}
+            />
           )}
         </CardContent>
       </Card>
