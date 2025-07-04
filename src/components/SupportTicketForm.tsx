@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import ContactSearch from "./ContactSearch";
-import ContactResult from "./ContactResult";
 import TicketsList from "./TicketsList";
 import ProgressIndicator from "./ProgressIndicator";
 
@@ -26,6 +25,7 @@ interface TicketData {
 interface ContactData {
   contactId: string;
   fullName: string;
+  firstname?: string;
   email?: string;
   phone?: string;
 }
@@ -92,19 +92,21 @@ const SupportTicketForm = () => {
       console.log('Search result:', data);
       setSearchResult(data);
       
-      // If contact found, search for tickets
+      // If contact found, search for tickets and go to step 2
       if (data.found && data.contact) {
         await searchTickets(data.contact.contactId);
+        setCurrentStep(2);
+      } else {
+        // If contact not found, stay on step 1 to show error inline
+        setCurrentStep(1);
       }
-      
-      setCurrentStep(2);
     } catch (error) {
       console.error('Error searching contact:', error);
       setSearchResult({
         found: false,
         error: 'Failed to search for contact. Please try again.'
       });
-      setCurrentStep(2);
+      setCurrentStep(1);
     } finally {
       setIsLoading(false);
     }
@@ -152,14 +154,21 @@ const SupportTicketForm = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--gradient-sunset)' }}>
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#f5f7ff' }}>
       <Card className="form-card w-full max-w-md mx-auto bg-white/95 backdrop-blur-sm">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Support Ensol</CardTitle>
-          <CardDescription>
-            {autoSubmitted 
-              ? "Détection automatique de vos informations..." 
-              : "Envoi d'une nouvelle demande"
+        <CardHeader className="text-center" style={{ background: 'var(--gradient-header)' }}>
+          <CardTitle className="text-2xl font-bold text-white">
+            {currentStep === 2 && searchResult?.found && searchResult.contact?.firstname 
+              ? `Bonjour, ${searchResult.contact.firstname}` 
+              : "Support Ensol"
+            }
+          </CardTitle>
+          <CardDescription className="text-white/90">
+            {currentStep === 2 && searchResult?.found 
+              ? "Choisissez une demande existante"
+              : autoSubmitted 
+                ? "Détection automatique de vos informations..." 
+                : "Envoi d'une nouvelle demande"
             }
           </CardDescription>
         </CardHeader>
@@ -176,27 +185,18 @@ const SupportTicketForm = () => {
                 isLoading={isLoading}
                 autoSubmitted={autoSubmitted}
                 initialFormData={formData}
+                searchResult={searchResult}
               />
             )}
           </div>
 
-          {/* Step 2: Search Results */}
-          {currentStep === 2 && searchResult && (
-            <div className="space-y-6">
-              <ContactResult 
-                searchResult={searchResult}
-                onTryAgain={handleTryAgain}
-              />
-              
-              {/* Show tickets if contact found */}
-              {searchResult.found && searchResult.contact && (
-                <TicketsList
-                  tickets={tickets}
-                  isLoading={ticketsLoading}
-                  onTicketClick={handleTicketClick}
-                />
-              )}
-            </div>
+          {/* Step 2: Tickets List */}
+          {currentStep === 2 && searchResult?.found && (
+            <TicketsList
+              tickets={tickets}
+              isLoading={ticketsLoading}
+              onTicketClick={handleTicketClick}
+            />
           )}
         </CardContent>
       </Card>

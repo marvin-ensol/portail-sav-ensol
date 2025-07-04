@@ -222,7 +222,6 @@ const ContactSearch = ({ onSubmit, isLoading, autoSubmitted, initialFormData, se
                   (formData.method === "phone" && !validatePhoneNumber(formData.value))
                 }
                 className="w-full h-12 text-base font-medium"
-                style={{ background: 'var(--gradient-primary)' }}
               >
                 {isLoading ? (
                   <>
