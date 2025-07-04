@@ -101,7 +101,7 @@ const SupportTicketForm = () => {
   const identificationOptions = [
     {
       id: "phone" as const,
-      title: "Numéro de téléphone",
+      title: "Num. de mobile",
       icon: Phone,
       placeholder: "06 12 34 56 78",
       inputType: "tel",
@@ -219,7 +219,7 @@ const SupportTicketForm = () => {
                         <IconComponent className="h-4 w-4" />
                         <span className="text-sm hidden sm:inline">{option.title}</span>
                         <span className="text-sm sm:hidden">
-                          {option.id === 'phone' ? 'Téléphone' : 'Email'}
+                          {option.id === 'phone' ? 'Num. de mobile' : 'Email'}
                         </span>
                       </button>
                     );
@@ -229,7 +229,7 @@ const SupportTicketForm = () => {
             )}
 
             {/* Input Field Container - Fixed Height to Prevent Resizing */}
-            <div className="min-h-[120px] flex flex-col justify-start">
+            <div className="min-h-[120px] flex flex-col justify-start mt-6">
               {(formData.method || autoSubmitted) && selectedOption && (
                 <div className="space-y-4">
                   <div className="relative">
