@@ -94,17 +94,19 @@ const StepRenderer = ({
             onDealClick={onDealClick}
           />
           
-          {/* Back Button */}
-          <div className="pt-4 border-t">
-            <Button
-              onClick={onBackToTickets}
-              className="w-full h-12 text-base font-medium"
-              variant="outline"
-            >
-              <ArrowLeft className="mr-2 h-5 w-5" />
-              Retour
-            </Button>
-          </div>
+          {/* Back Button - only show if there are tickets to go back to */}
+          {tickets.length > 0 && (
+            <div className="pt-4 border-t">
+              <Button
+                onClick={onBackToTickets}
+                className="w-full h-12 text-base font-medium"
+                variant="outline"
+              >
+                <ArrowLeft className="mr-2 h-5 w-5" />
+                Retour
+              </Button>
+            </div>
+          )}
         </>
       )}
 

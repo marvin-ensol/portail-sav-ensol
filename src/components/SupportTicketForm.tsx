@@ -37,13 +37,16 @@ const SupportTicketForm = () => {
   const handleSubmit = async (method: IdentificationMethod, value: string) => {
     const result = await searchContact(method, value);
     
-    // If contact found, search for tickets and deals, then go to step 2
+    // If contact found, search for tickets and deals
     if (result?.found && result.contact) {
-      await Promise.all([
+      const [foundTickets] = await Promise.all([
         searchTickets(result.contact.contactId),
         searchDeals(result.contact.contactId)
       ]);
-      goToStep(2);
+      
+      // If no tickets found, skip directly to deals selection (step 3)
+      // Otherwise go to tickets list (step 2)
+      goToStep(foundTickets.length > 0 ? 2 : 3);
     }
   };
 
@@ -105,8 +108,8 @@ const SupportTicketForm = () => {
     <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#f5f7ff' }}>
       <Card className="form-card w-full max-w-md mx-auto bg-white/95 backdrop-blur-sm">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold gradient-text">
-            {currentStep === 2 && searchResult?.found && searchResult.contact?.firstname 
+           <CardTitle className="text-2xl font-bold gradient-text">
+            {(currentStep === 2 || currentStep === 3) && searchResult?.found && searchResult.contact?.firstname 
               ? `Bonjour, ${searchResult.contact.firstname}` 
               : "Support Ensol"
             }

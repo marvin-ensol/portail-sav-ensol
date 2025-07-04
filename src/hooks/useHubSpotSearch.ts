@@ -64,15 +64,19 @@ export const useHubSpotSearch = () => {
 
       if (error) {
         console.error('Supabase function error:', error);
-        return;
+        return [];
       }
 
       if (data.success && data.tickets) {
         setTickets(data.tickets);
         console.log(`Found ${data.tickets.length} tickets`);
+        return data.tickets;
       }
+      
+      return [];
     } catch (error) {
       console.error('Error searching tickets:', error);
+      return [];
     } finally {
       setTicketsLoading(false);
     }
