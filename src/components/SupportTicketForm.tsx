@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Phone, Mail, Laptop, Loader2, CheckCircle } from "lucide-react";
+import { Phone, Mail, Loader2, CheckCircle } from "lucide-react";
 
 type IdentificationMethod = "phone" | "email";
 
@@ -20,6 +20,8 @@ const SupportTicketForm = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [autoSubmitted, setAutoSubmitted] = useState(false);
+  const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
+  const [emailSuggestions, setEmailSuggestions] = useState<string[]>([]);
 
   // UTM parameter detection and auto-population
   useEffect(() => {
@@ -56,6 +58,44 @@ const SupportTicketForm = () => {
     return digits.length === 10;
   };
 
+  const commonEmailDomains = [
+    'gmail.com',
+    'free.fr', 
+    'yahoo.fr',
+    'live.fr',
+    'hotmail.fr',
+    'outlook.fr',
+    'orange.fr',
+    'wanadoo.fr',
+    'laposte.net',
+    'sfr.fr'
+  ];
+
+  const generateEmailSuggestions = (email: string) => {
+    const atIndex = email.lastIndexOf('@');
+    if (atIndex === -1 || atIndex === email.length - 1) return [];
+    
+    const localPart = email.substring(0, atIndex);
+    const domainPart = email.substring(atIndex + 1).toLowerCase();
+    
+    if (!domainPart) {
+      // Show all domains if no domain typed yet
+      return commonEmailDomains.map(domain => `${localPart}@${domain}`);
+    }
+    
+    // Filter domains that start with the typed domain part
+    const matchingDomains = commonEmailDomains.filter(domain => 
+      domain.toLowerCase().startsWith(domainPart)
+    );
+    
+    return matchingDomains.map(domain => `${localPart}@${domain}`);
+  };
+
+  const handleEmailSuggestionSelect = (suggestion: string) => {
+    setFormData(prev => ({ ...prev, value: suggestion }));
+    setShowEmailSuggestions(false);
+  };
+
   const identificationOptions = [
     {
       id: "phone" as const,
@@ -83,6 +123,14 @@ const SupportTicketForm = () => {
     // Format phone number if phone method is selected
     if (formData.method === "phone") {
       processedValue = formatPhoneNumber(value);
+      setShowEmailSuggestions(false);
+    }
+    
+    // Generate email suggestions if email method is selected
+    if (formData.method === "email") {
+      const suggestions = generateEmailSuggestions(value);
+      setEmailSuggestions(suggestions);
+      setShowEmailSuggestions(suggestions.length > 0 && value.includes('@'));
     }
     
     setFormData(prev => ({ ...prev, value: processedValue }));
@@ -157,15 +205,33 @@ const SupportTicketForm = () => {
                   <Label htmlFor="identification">
                     Saisissez votre {selectedOption.title.toLowerCase()}
                   </Label>
-                  <Input
-                    id="identification"
-                    type={selectedOption.inputType}
-                    placeholder={selectedOption.placeholder}
-                    value={formData.value}
-                    onChange={(e) => handleInputChange(e.target.value)}
-                    className="w-full"
-                    disabled={isLoading || autoSubmitted}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="identification"
+                      type={selectedOption.inputType}
+                      placeholder={selectedOption.placeholder}
+                      value={formData.value}
+                      onChange={(e) => handleInputChange(e.target.value)}
+                      className="w-full"
+                      disabled={isLoading || autoSubmitted}
+                      onBlur={() => setTimeout(() => setShowEmailSuggestions(false), 200)}
+                    />
+                    
+                    {/* Email suggestions dropdown */}
+                    {showEmailSuggestions && formData.method === "email" && (
+                      <div className="absolute top-full left-0 right-0 bg-white border border-input rounded-md shadow-lg z-50 max-h-48 overflow-y-auto">
+                        {emailSuggestions.map((suggestion, index) => (
+                          <div
+                            key={index}
+                            className="px-3 py-2 hover:bg-accent hover:text-accent-foreground cursor-pointer text-sm"
+                            onClick={() => handleEmailSuggestionSelect(suggestion)}
+                          >
+                            {suggestion}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {!autoSubmitted && (
