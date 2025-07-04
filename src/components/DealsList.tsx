@@ -93,7 +93,7 @@ const DealsList = ({ deals, isLoading, onDealClick }: DealsListProps) => {
                     {/* Installation date */}
                     <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                       <Clock className="h-3 w-3" />
-                      <span>Installation le {formatInstallationDate(deal.dateEnteredInstallationDone)}</span>
+                      <span>{formatInstallationDate(deal.dateEnteredInstallationDone)}</span>
                     </div>
                   </div>
                 </CardContent>

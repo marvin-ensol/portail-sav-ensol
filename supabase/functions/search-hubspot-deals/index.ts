@@ -83,7 +83,8 @@ serve(async (req) => {
         'postcode',
         'date_entered__installation_done_',
         'products',
-        'is_quote_signed'
+        'is_quote_signed',
+        'hs_is_closed_lost'
       ]
     }
 
@@ -120,11 +121,12 @@ serve(async (req) => {
       postcode: deal.properties.postcode || '',
       dateEnteredInstallationDone: deal.properties.date_entered__installation_done_ || null,
       products: deal.properties.products ? deal.properties.products.split(';') : [],
-      isQuoteSigned: deal.properties.is_quote_signed || '0'
+      isQuoteSigned: deal.properties.is_quote_signed || '0',
+      isClosedLost: deal.properties.hs_is_closed_lost || 'false'
     })) || []
 
-    // Filter deals where quote is signed (is_quote_signed = 1)
-    deals = deals.filter((deal: any) => deal.isQuoteSigned === '1')
+    // Filter deals where quote is signed (is_quote_signed = 1) and not closed lost
+    deals = deals.filter((deal: any) => deal.isQuoteSigned === '1' && deal.isClosedLost !== 'true')
 
     // Sort by installation date (most recent first)
     deals.sort((a: any, b: any) => {

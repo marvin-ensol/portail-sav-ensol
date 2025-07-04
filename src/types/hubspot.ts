@@ -30,6 +30,7 @@ export interface DealData {
   dateEnteredInstallationDone: string | null;
   products: string[];
   isQuoteSigned: string;
+  isClosedLost?: string;
 }
 
 export interface ContactData {
