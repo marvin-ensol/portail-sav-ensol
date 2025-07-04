@@ -39,7 +39,7 @@ All colors MUST be HSL.
     --gradient-primary: linear-gradient(135deg, hsl(227 100% 23%), hsl(227 100% 30%));
     --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(315 15% 98%));
     --gradient-sunset: linear-gradient(90deg, hsl(228 100% 98%));
-    --gradient-text: linear-gradient(90deg, hsl(227 100% 23%), hsl(341 92% 89%), hsl(283 56% 62%));
+    --gradient-text: linear-gradient(90deg, hsl(341 92% 89%), hsl(283 56% 62%));
     --shadow-elegant: 0 10px 30px -10px hsl(227 100% 23% / 0.15);
     --glow-primary: 0 0 40px hsl(227 100% 23% / 0.1);
 
