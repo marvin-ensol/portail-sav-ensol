@@ -188,13 +188,31 @@ serve(async (req) => {
 
     console.log('Note data:', JSON.stringify(noteData, null, 2))
 
-    const createNoteResponse = await fetch('https://api.hubapi.com/crm/v3/objects/notes', {
+    const createNoteResponse = await fetch('https://api.hubapi.com/crm/v3/objects/notes/batch/create', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(noteData)
+      body: JSON.stringify([
+        {
+          "objectType": "notes",
+          "properties": [
+            {
+              "key": "hs_note_body",
+              "value": noteContent
+            }
+          ],
+          "associations": [
+            {
+              "typeId": 18,
+              "toObjectId": ticketId
+            }
+          ],
+          "hs_timestamp": new Date().toISOString(),
+          "parseCustomFields": true
+        }
+      ])
     })
 
     console.log('Note creation response status:', createNoteResponse.status)
