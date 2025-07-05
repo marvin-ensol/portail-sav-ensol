@@ -97,7 +97,7 @@ serve(async (req) => {
       inputs: emailIds.map((id: string) => ({ id })),
       properties: [
         "hs_timestamp",
-        "hs_email_text", 
+        "hs_email_html", 
         "hs_email_direction",
         "hs_email_subject"
       ]
@@ -140,7 +140,7 @@ serve(async (req) => {
       .map((email: any) => ({
         id: email.id,
         timestamp: email.properties?.hs_timestamp || null,
-        text: email.properties?.hs_email_text || '',
+        text: email.properties?.hs_email_html || '',
         direction: email.properties?.hs_email_direction || 'UNKNOWN',
         subject: email.properties?.hs_email_subject || '',
         isClient: email.properties?.hs_email_direction === 'INCOMING_EMAIL',

@@ -110,7 +110,7 @@ const TicketDetails = ({ ticket, deal, onBack }: TicketDetailsProps) => {
             </div>
           ) : messages.length === 0 ? (
             <div className="text-center text-muted-foreground">
-              Aucun message trouvé
+              Aucun message à afficher
             </div>
           ) : (
             <>
@@ -140,7 +140,7 @@ const TicketDetails = ({ ticket, deal, onBack }: TicketDetailsProps) => {
           {/* Closed status - centered with more spacing */}
           {closedDateText && (
             <div className="flex justify-center mt-4">
-              <div className="flex items-center space-x-2 text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
+              <div className="flex items-center space-x-2 text-xs text-white bg-green-600 px-2 py-1 rounded-full">
                 <span>✓</span>
                 <span>{closedDateText}</span>
               </div>

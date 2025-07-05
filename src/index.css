@@ -43,7 +43,7 @@ All colors MUST be HSL.
     --shadow-elegant: 0 10px 30px -10px hsl(227 100% 23% / 0.15);
     --glow-primary: 0 0 40px hsl(227 100% 23% / 0.1);
 
-    --message-client: 232 84% 69%;
+    --message-client: 337 82% 78%;
     --message-ensol: 49 100% 93%;
 
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

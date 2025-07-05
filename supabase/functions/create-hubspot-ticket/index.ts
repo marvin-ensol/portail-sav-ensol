@@ -160,7 +160,7 @@ serve(async (req) => {
         hs_timestamp: Date.now(),
         hs_email_status: "SENT",
         hs_email_subject: subject,
-        hs_email_text: description,
+        hs_email_html: description,
         ...(uploadedFileIds.length > 0 && {
           hs_attachment_ids: uploadedFileIds.join(';')
         })
