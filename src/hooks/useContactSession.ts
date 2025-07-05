@@ -20,6 +20,7 @@ export const useContactSession = ({
     if (currentStep !== 1) return;
     
     const session = getContactSession();
+    console.log('Cookie session check:', { session, currentStep });
     if (session) {
       console.log('Found contact session, auto-submitting:', session);
       setFormData({ method: session.method, value: session.value });
