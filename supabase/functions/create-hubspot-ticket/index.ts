@@ -82,20 +82,23 @@ serve(async (req) => {
     console.log('Ticket created successfully with ID:', ticketId)
 
     // Create a note associated with the ticket
+    console.log('Creating note for ticket:', ticketId)
     const noteContent = `<b>Nouveau ticket soumis en ligne :</b>\n${description}\n\n`
     
     const noteData = {
       properties: {
         hs_note_body: noteContent,
-        hs_timestamp: new Date().toISOString()
+        hs_timestamp: Date.now()
       },
       associations: [
         {
           to: { id: ticketId },
-          types: [{ associationCategory: 'HUBSPOT_DEFINED', associationTypeId: 214 }] // Note to Ticket
+          types: [{ associationCategory: 'HUBSPOT_DEFINED', associationTypeId: 204 }] // Try different ID for Note to Ticket
         }
       ]
     }
+
+    console.log('Note data:', JSON.stringify(noteData, null, 2))
 
     const createNoteResponse = await fetch(`${HUBSPOT_BASE_URL}/objects/notes`, {
       method: 'POST',
@@ -106,14 +109,17 @@ serve(async (req) => {
       body: JSON.stringify(noteData)
     })
 
+    console.log('Note creation response status:', createNoteResponse.status)
+
     if (!createNoteResponse.ok) {
       const errorText = await createNoteResponse.text()
-      console.error('Failed to create note:', errorText)
+      console.error('Failed to create note. Status:', createNoteResponse.status)
+      console.error('Note creation error response:', errorText)
       // Don't fail the entire operation if note creation fails
       console.log('Ticket created successfully, but note creation failed')
     } else {
       const noteResult = await createNoteResponse.json()
-      console.log('Note created with ID:', noteResult.id)
+      console.log('Note created successfully with ID:', noteResult.id)
     }
 
     return Response.json(

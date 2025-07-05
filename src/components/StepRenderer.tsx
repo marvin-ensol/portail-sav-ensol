@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Plus, ArrowLeft } from "lucide-react";
+import { Plus, ArrowLeft, Check } from "lucide-react";
 import ContactSearch from "./ContactSearch";
 import TicketsList from "./TicketsList";
 import DealsList from "./DealsList";
@@ -126,9 +126,9 @@ const StepRenderer = ({
       {currentStep === 5 && (
         <div className="text-center space-y-4">
           <div className="text-green-600 mb-4">
-            <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
+            <div className="w-16 h-16 mx-auto bg-green-100 rounded-full flex items-center justify-center animate-scale-in">
+              <Check className="w-8 h-8 animate-fade-in" strokeWidth={3} />
+            </div>
           </div>
           
           <Button

@@ -97,7 +97,11 @@ const SupportTicketForm = () => {
     goToStep(3);
   };
 
-  const handleViewTickets = () => {
+  const handleViewTickets = async () => {
+    // Refresh tickets before showing them
+    if (searchResult?.contact?.contactId) {
+      await searchTickets(searchResult.contact.contactId);
+    }
     goToStep(2);
   };
 
