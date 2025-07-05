@@ -260,13 +260,13 @@ const TicketDetails = ({ ticket, deal, onBack }: TicketDetailsProps) => {
           onClick={() => setSelectedPhoto(null)}
         >
           <div 
-            className="relative max-w-4xl max-h-full"
+            className="relative w-[75vw] h-[75vh]"
             onClick={(e) => e.stopPropagation()}
           >
             <img
               src={selectedPhoto.url}
               alt={selectedPhoto.name}
-              className="max-w-full max-h-full object-contain rounded-lg"
+              className="w-full h-full object-contain rounded-lg"
             />
             
             {/* Controls */}
@@ -277,7 +277,7 @@ const TicketDetails = ({ ticket, deal, onBack }: TicketDetailsProps) => {
                 onClick={() => downloadPhoto(selectedPhoto)}
                 className="bg-black/50 text-white hover:bg-black/70"
               >
-                Download
+                Télécharger
               </Button>
               <Button
                 size="sm"
