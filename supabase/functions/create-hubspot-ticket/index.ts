@@ -239,73 +239,46 @@ serve(async (req) => {
       const noteResult = await createNoteResponse.json()
       console.log('Comprehensive note created successfully with ID:', noteResult.id)
       
-      // If files were uploaded, update the note to add attachments
+      // If files were uploaded, try attaching them via engagements API as fallback
       if (uploadedFileIds.length > 0) {
-        console.log('Updating note to add attachments. Note ID:', noteResult.id)
+        console.log('Attempting to attach files via engagements API')
         
-        const updateNotePayload = {
-          properties: {
-            hs_note_body: noteContent,
-            hs_timestamp: Date.now()
+        const engagementData = {
+          engagement: {
+            active: true,
+            type: 'NOTE',
+            timestamp: Date.now()
+          },
+          associations: {
+            ticketIds: [parseInt(ticketId)]
           },
           attachments: uploadedFileIds.map(fileId => ({
-            id: fileId
-          }))
+            id: parseInt(fileId)
+          })),
+          metadata: {
+            body: `Fichiers attachés: ${files?.map(f => f.name).join(', ')}`
+          }
         }
 
-        console.log('Update note payload:', JSON.stringify(updateNotePayload, null, 2))
+        console.log('Engagement data:', JSON.stringify(engagementData, null, 2))
 
-        const updateNoteResponse = await fetch(`https://api.hubapi.com/crm/v3/objects/notes/${noteResult.id}`, {
-          method: 'PATCH',
+        const createEngagementResponse = await fetch('https://api.hubapi.com/engagements/v1/engagements', {
+          method: 'POST',
           headers: {
             'Authorization': `Bearer ${accessToken}`,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(updateNotePayload)
+          body: JSON.stringify(engagementData)
         })
 
-        console.log('Update note response status:', updateNoteResponse.status)
-
-        if (!updateNoteResponse.ok) {
-          const errorText = await updateNoteResponse.text()
-          console.error('Failed to update note with attachments. Status:', updateNoteResponse.status, 'Error:', errorText)
-          
-          // Fallback to engagements API if note update fails
-          console.log('Attempting fallback via engagements API')
-          
-          const engagementData = {
-            engagement: {
-              active: true,
-              type: 'NOTE',
-              timestamp: Date.now()
-            },
-            associations: {
-              ticketIds: [parseInt(ticketId)]
-            },
-            attachments: uploadedFileIds.map(fileId => ({
-              id: parseInt(fileId)
-            })),
-            metadata: {
-              body: `Fichiers attachés: ${files?.map(f => f.name).join(', ')}`
-            }
-          }
-
-          const createEngagementResponse = await fetch('https://api.hubapi.com/engagements/v1/engagements', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${accessToken}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(engagementData)
-          })
-
-          if (createEngagementResponse.ok) {
-            const engagementResult = await createEngagementResponse.json()
-            console.log('Fallback engagement created successfully with ID:', engagementResult.engagement.id)
-          }
+        console.log('Engagement response status:', createEngagementResponse.status)
+        
+        if (!createEngagementResponse.ok) {
+          const errorText = await createEngagementResponse.text()
+          console.error('Failed to create file engagement. Status:', createEngagementResponse.status, 'Error:', errorText)
         } else {
-          const updateResult = await updateNoteResponse.json()
-          console.log('Note updated successfully with attachments:', updateResult.id)
+          const engagementResult = await createEngagementResponse.json()
+          console.log('File engagement created successfully with ID:', engagementResult.engagement.id)
         }
       }
     }
