@@ -138,16 +138,24 @@ serve(async (req) => {
 
     // Format and sort messages chronologically
     const formattedMessages = emails
-      .map((email: any) => ({
-        id: email.id,
-        timestamp: email.properties?.hs_timestamp || null,
-        text: email.properties?.hs_email_html || '',
-        direction: email.properties?.hs_email_direction || 'UNKNOWN',
-        subject: email.properties?.hs_email_subject || '',
-        attachmentIds: email.properties?.hs_attachment_ids || [],
-        isClient: email.properties?.hs_email_direction === 'INCOMING_EMAIL',
-        isEnsol: email.properties?.hs_email_direction === 'EMAIL'
-      }))
+      .map((email: any) => {
+        // Parse attachment IDs from semicolon-separated string to array
+        const attachmentIdsString = email.properties?.hs_attachment_ids || '';
+        const attachmentIds = attachmentIdsString 
+          ? attachmentIdsString.split(';').filter((id: string) => id.trim().length > 0)
+          : [];
+        
+        return {
+          id: email.id,
+          timestamp: email.properties?.hs_timestamp || null,
+          text: email.properties?.hs_email_html || '',
+          direction: email.properties?.hs_email_direction || 'UNKNOWN',
+          subject: email.properties?.hs_email_subject || '',
+          attachmentIds: attachmentIds,
+          isClient: email.properties?.hs_email_direction === 'INCOMING_EMAIL',
+          isEnsol: email.properties?.hs_email_direction === 'EMAIL'
+        };
+      })
       .filter((message: any) => message.isClient || message.isEnsol) // Only show client and Ensol messages
       .sort((a: any, b: any) => {
         // Sort by timestamp chronologically (oldest first)
