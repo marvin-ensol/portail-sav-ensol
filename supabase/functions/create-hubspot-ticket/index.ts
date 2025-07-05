@@ -151,10 +151,9 @@ serve(async (req) => {
 
     console.log('Ticket created successfully with ID:', ticketId)
 
-    // Create a comprehensive note associated with the ticket
-    console.log('Creating comprehensive note for ticket:', ticketId)
+    // Create a note with the ticket description
+    console.log('Creating note for ticket:', ticketId)
     
-    // Build note content with description and file information
     let noteContent = `<b>Nouveau ticket soumis en ligne :</b><br>${description}<br><br>`
     
     if (files && files.length > 0 && uploadedFileIds.length > 0) {
@@ -166,28 +165,8 @@ serve(async (req) => {
       })
       noteContent += `<br>`
     }
-    
-    console.log('Note data:', JSON.stringify({
-      properties: {
-        hs_note_body: noteContent,
-        hs_timestamp: Date.now()
-      },
-      associations: [
-        {
-          to: {
-            id: ticketId
-          },
-          types: [
-            {
-              associationCategory: "HUBSPOT_DEFINED",
-              associationTypeId: 228
-            }
-          ]
-        }
-      ]
-    }, null, 2))
 
-    const notePayload: any = {
+    const notePayload = {
       properties: {
         hs_note_body: noteContent,
         hs_timestamp: Date.now()
@@ -206,17 +185,6 @@ serve(async (req) => {
         }
       ]
     }
-
-    // Add attachments if files were uploaded
-    if (uploadedFileIds.length > 0) {
-      console.log('Adding attachments to note. File IDs:', uploadedFileIds)
-      notePayload.attachments = uploadedFileIds.map(fileId => ({
-        id: fileId
-      }))
-      console.log('Attachments array:', JSON.stringify(notePayload.attachments, null, 2))
-    }
-
-    console.log('Complete note payload:', JSON.stringify(notePayload, null, 2))
 
     const createNoteResponse = await fetch('https://api.hubapi.com/crm/v3/objects/notes', {
       method: 'POST',
@@ -227,59 +195,54 @@ serve(async (req) => {
       body: JSON.stringify(notePayload)
     })
 
-    console.log('Note creation response status:', createNoteResponse.status)
-
     if (!createNoteResponse.ok) {
       const errorText = await createNoteResponse.text()
-      console.error('Failed to create note. Status:', createNoteResponse.status)
-      console.error('Note creation error response:', errorText)
-      // Don't fail the entire operation if note creation fails
-      console.log('Ticket created successfully, but note creation failed')
+      console.error('Failed to create note. Status:', createNoteResponse.status, 'Error:', errorText)
     } else {
       const noteResult = await createNoteResponse.json()
-      console.log('Comprehensive note created successfully with ID:', noteResult.id)
+      console.log('Note created successfully with ID:', noteResult.id)
+    }
+
+    // Attach files using engagements API if files were uploaded
+    if (uploadedFileIds.length > 0) {
+      console.log('Attaching files via engagements API')
       
-      // If files were uploaded, try attaching them via engagements API as fallback
-      if (uploadedFileIds.length > 0) {
-        console.log('Attempting to attach files via engagements API')
-        
-        const engagementData = {
-          engagement: {
-            active: true,
-            type: 'NOTE',
-            timestamp: Date.now()
-          },
-          associations: {
-            ticketIds: [parseInt(ticketId)]
-          },
-          attachments: uploadedFileIds.map(fileId => ({
-            id: parseInt(fileId)
-          })),
-          metadata: {
-            body: `Fichiers attachés: ${files?.map(f => f.name).join(', ')}`
-          }
+      const engagementData = {
+        engagement: {
+          active: true,
+          type: 'NOTE',
+          timestamp: Date.now()
+        },
+        associations: {
+          ticketIds: [parseInt(ticketId)]
+        },
+        attachments: uploadedFileIds.map(fileId => ({
+          id: parseInt(fileId)
+        })),
+        metadata: {
+          body: `Fichiers attachés: ${files?.map(f => f.name).join(', ')}`
         }
+      }
 
-        console.log('Engagement data:', JSON.stringify(engagementData, null, 2))
+      console.log('Engagement data:', JSON.stringify(engagementData, null, 2))
 
-        const createEngagementResponse = await fetch('https://api.hubapi.com/engagements/v1/engagements', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(engagementData)
-        })
+      const createEngagementResponse = await fetch('https://api.hubapi.com/engagements/v1/engagements', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(engagementData)
+      })
 
-        console.log('Engagement response status:', createEngagementResponse.status)
-        
-        if (!createEngagementResponse.ok) {
-          const errorText = await createEngagementResponse.text()
-          console.error('Failed to create file engagement. Status:', createEngagementResponse.status, 'Error:', errorText)
-        } else {
-          const engagementResult = await createEngagementResponse.json()
-          console.log('File engagement created successfully with ID:', engagementResult.engagement.id)
-        }
+      console.log('Engagement response status:', createEngagementResponse.status)
+      
+      if (!createEngagementResponse.ok) {
+        const errorText = await createEngagementResponse.text()
+        console.error('Failed to create file engagement. Status:', createEngagementResponse.status, 'Error:', errorText)
+      } else {
+        const engagementResult = await createEngagementResponse.json()
+        console.log('File engagement created successfully with ID:', engagementResult.engagement.id)
       }
     }
 
