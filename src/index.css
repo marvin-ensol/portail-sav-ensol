@@ -157,4 +157,48 @@ All colors MUST be HSL.
     -webkit-text-fill-color: transparent;
     background-size: 200% 200%;
   }
+  
+  .message-content {
+    @apply leading-relaxed;
+  }
+  
+  .message-content p {
+    @apply mb-2 last:mb-0;
+  }
+  
+  .message-content br {
+    @apply block mb-1;
+  }
+  
+  .message-content strong {
+    @apply font-semibold;
+  }
+  
+  .message-content em {
+    @apply italic;
+  }
+  
+  .message-content u {
+    @apply underline;
+  }
+  
+  .message-content ul, .message-content ol {
+    @apply ml-4 mb-2 last:mb-0;
+  }
+  
+  .message-content ul {
+    @apply list-disc;
+  }
+  
+  .message-content ol {
+    @apply list-decimal;
+  }
+  
+  .message-content li {
+    @apply mb-1;
+  }
+  
+  .message-content a {
+    @apply text-primary underline hover:text-primary/80 transition-colors;
+  }
 }

@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import DealInfoCard from "./DealInfoCard";
+import { sanitizeMessageHtml } from "@/lib/htmlSanitizer";
 import type { TicketData, DealData } from "@/types/hubspot";
 
 interface TicketMessage {
@@ -119,9 +120,12 @@ const TicketDetails = ({ ticket, deal, onBack }: TicketDetailsProps) => {
                   <div className="max-w-[80%] space-y-2">
                     <Card className={`${message.isClient ? 'bg-message-client' : 'bg-message-ensol'} text-foreground border-0`}>
                       <CardContent className="p-3">
-                        <p className="text-sm">
-                          {message.text || message.subject}
-                        </p>
+                        <div 
+                          className="text-sm message-content"
+                          dangerouslySetInnerHTML={{ 
+                            __html: sanitizeMessageHtml(message.text || message.subject) 
+                          }}
+                        />
                       </CardContent>
                     </Card>
                     
