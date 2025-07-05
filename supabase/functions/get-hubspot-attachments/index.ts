@@ -43,50 +43,36 @@ serve(async (req) => {
       );
     }
 
-    // Batch read attachment details
-    const attachmentDetailsUrl = 'https://api.hubapi.com/files/v3/files/batch/read';
-    const attachmentDetailsBody = {
-      inputs: attachmentIds.map((id: string) => ({ id })),
-      properties: [
-        "name",
-        "extension", 
-        "type",
-        "size",
-        "url",
-        "created_at"
-      ]
-    };
-
+    // Fetch attachment details individually (no batch endpoint available)
     console.log('Fetching attachment details for IDs:', attachmentIds);
 
-    const attachmentDetailsResponse = await fetch(attachmentDetailsUrl, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${hubspotAccessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(attachmentDetailsBody)
+    const attachmentPromises = attachmentIds.map(async (attachmentId: string) => {
+      const attachmentUrl = `https://api.hubapi.com/files/v3/files/${attachmentId}`;
+      
+      try {
+        const response = await fetch(attachmentUrl, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${hubspotAccessToken}`,
+            'Content-Type': 'application/json',
+          }
+        });
+
+        if (!response.ok) {
+          console.error(`Failed to fetch attachment ${attachmentId}:`, response.status);
+          return null;
+        }
+
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error(`Error fetching attachment ${attachmentId}:`, error);
+        return null;
+      }
     });
 
-    const attachmentDetailsData = await attachmentDetailsResponse.json();
-    console.log('HubSpot attachment details response:', attachmentDetailsData);
-
-    if (!attachmentDetailsResponse.ok) {
-      console.error('HubSpot attachment details API error:', attachmentDetailsData);
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Failed to get attachment details from HubSpot',
-          details: attachmentDetailsData
-        }),
-        { 
-          status: attachmentDetailsResponse.status, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-    }
-
-    const attachments = attachmentDetailsData.results || [];
+    const attachmentResults = await Promise.all(attachmentPromises);
+    const attachments = attachmentResults.filter(result => result !== null);
     console.log(`Found ${attachments.length} attachments`);
 
     // Filter for photo files only and format the data
