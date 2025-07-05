@@ -59,7 +59,7 @@ serve(async (req) => {
           formData.append('file', blob, file.name)
           formData.append('folderId', '250402102515')
           formData.append('options', JSON.stringify({
-            access: 'PRIVATE',
+            access: 'PUBLIC_NOT_INDEXABLE',
             ttl: 'P3M', // 3 months
             overwrite: false
           }))

@@ -151,6 +151,18 @@ const TicketDetails = ({ ticket, deal, onBack }: TicketDetailsProps) => {
     document.body.removeChild(link);
   };
 
+  const getStatusBadge = (status: string) => {
+    const statusMap: Record<string, { label: string; color: string }> = {
+      '1': { label: 'Nous allons bientôt traiter votre demande', color: 'bg-yellow-100 text-yellow-700' },
+      '2': { label: 'Nous vous demandons plus d\'informations', color: 'bg-gray-100 text-gray-700' },
+      '573356530': { label: 'En cours de traitement', color: 'bg-blue-100 text-blue-700' },
+      '573359340': { label: 'Intervention planifiée', color: 'bg-orange-100 text-orange-700' },
+      '573356532': { label: 'Intervention effectuée', color: 'bg-purple-100 text-purple-700' },
+      '4': { label: 'Résolu', color: 'bg-green-100 text-green-700' }
+    };
+    return statusMap[status] || { label: 'Statut inconnu', color: 'bg-gray-100 text-gray-700' };
+  };
+
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-semibold text-foreground text-center">
@@ -221,15 +233,23 @@ const TicketDetails = ({ ticket, deal, onBack }: TicketDetailsProps) => {
             </>
           )}
           
-          {/* Closed status - centered with more spacing */}
-          {closedDateText && (
-            <div className="flex justify-center mt-4">
-              <div className="flex items-center space-x-2 text-xs text-white bg-green-600 px-2 py-1 rounded-full">
-                <span>✓</span>
-                <span>{closedDateText}</span>
-              </div>
-            </div>
-          )}
+          {/* Ticket Status */}
+          <div className="flex justify-center mt-4">
+            {(() => {
+              const statusBadge = getStatusBadge(ticket.hs_pipeline_stage || ticket.status);
+              const isResolved = ticket.hs_pipeline_stage === "4" || ticket.status === "4";
+              const statusLabel = isResolved && ticket.lastModified 
+                ? `Résolu le ${formatClosedDate(ticket.lastModified)?.replace('Résolu le ', '')}`
+                : statusBadge.label;
+              
+              return (
+                <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium ${statusBadge.color}`}>
+                  {isResolved && <span className="mr-1">✓</span>}
+                  {statusLabel}
+                </span>
+              );
+            })()}
+          </div>
         </div>
       </Card>
 
