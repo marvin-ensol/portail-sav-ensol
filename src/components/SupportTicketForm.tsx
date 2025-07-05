@@ -171,7 +171,7 @@ const SupportTicketForm = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#f5f7ff' }}>
+    <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="form-card w-full max-w-md mx-auto bg-white/95 backdrop-blur-sm">
         <CardHeader className="text-center">
            <CardTitle className="text-2xl font-bold gradient-text">
