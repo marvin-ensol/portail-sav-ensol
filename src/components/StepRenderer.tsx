@@ -5,7 +5,6 @@ import TicketsList from "./TicketsList";
 import DealsList from "./DealsList";
 import TicketCreationForm from "./TicketCreationForm";
 import TicketDetails from "./TicketDetails";
-import ProgressIndicator from "./ProgressIndicator";
 import type { FormData, IdentificationMethod, TicketData, DealData, SearchResult } from "@/types/hubspot";
 
 interface StepRendererProps {
@@ -127,15 +126,12 @@ const StepRenderer = ({
 
       {/* Step 4: Ticket Creation Form */}
       {currentStep === 4 && (
-        <>
-          <ProgressIndicator currentStep={3} totalSteps={3} />
-          <TicketCreationForm
-            deal={selectedDeal || undefined}
-            onSubmit={onTicketSubmit}
-            onBack={selectedDeal ? onBackToDeals : onBackToTickets}
-            isSubmitting={isSubmittingTicket}
-          />
-        </>
+        <TicketCreationForm
+          deal={selectedDeal || undefined}
+          onSubmit={onTicketSubmit}
+          onBack={selectedDeal ? onBackToDeals : onBackToTickets}
+          isSubmitting={isSubmittingTicket}
+        />
       )}
 
       {/* Step 5: Success Page */}

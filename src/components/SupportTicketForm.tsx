@@ -84,7 +84,7 @@ const SupportTicketForm = () => {
         <CardContent className="space-y-6">
           {/* Progress indicator at top */}
           {currentStep < 5 && currentStep !== 6 && (
-            <ProgressIndicator currentStep={currentStep === 6 ? 3 : currentStep} totalSteps={currentStep === 4 ? 4 : 3} />
+            <ProgressIndicator currentStep={currentStep === 4 ? 3 : currentStep} totalSteps={3} />
           )}
           
           {/* Horizontal divider for ticket details */}
