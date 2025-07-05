@@ -117,13 +117,13 @@ const SupportTicketForm = () => {
       
       {/* Disconnect button - only show when user is logged in (not on step 1) */}
       {currentStep > 1 && (
-        <div className="mt-6">
+        <div className="mt-6 flex justify-center">
           <button
             onClick={handleDisconnect}
-            className="group flex items-center justify-center text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-300 px-3 py-1.5 rounded-full min-w-[2.5rem] hover:min-w-[7rem]"
+            className="group flex items-center justify-center text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-300 px-3 py-1.5 rounded-full hover:-translate-x-4"
           >
             <LogOut className="h-4 w-4 flex-shrink-0" />
-            <span className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap overflow-hidden">
+            <span className="ml-2 w-0 opacity-0 group-hover:w-auto group-hover:opacity-100 transition-all duration-300 whitespace-nowrap overflow-hidden">
               Déconnexion
             </span>
           </button>
