@@ -179,7 +179,7 @@ serve(async (req) => {
           types: [
             {
               associationCategory: "HUBSPOT_DEFINED",
-              associationTypeId: 227
+              associationTypeId: 228
             }
           ]
         }
@@ -205,7 +205,7 @@ serve(async (req) => {
             types: [
               {
                 associationCategory: "HUBSPOT_DEFINED",
-                associationTypeId: 227
+                associationTypeId: 228
               }
             ]
           }
