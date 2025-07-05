@@ -90,31 +90,40 @@ serve(async (req) => {
     const attachments = attachmentResults.filter(result => result !== null);
     console.log(`Found ${attachments.length} attachments`);
 
-    // Filter for photo files only and format the data
+    // Format the data (temporarily removing photo filter to debug)
     const photoAttachments = attachments
-      .filter((attachment: any) => {
-        const extension = attachment.properties?.extension?.toLowerCase() || '';
-        const type = attachment.properties?.type?.toLowerCase() || '';
-        return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(extension) ||
-               type.startsWith('image/');
-      })
       .map((attachment: any) => ({
         id: attachment.id,
-        name: attachment.properties?.name || 'Untitled',
-        extension: attachment.properties?.extension || '',
-        type: attachment.properties?.type || '',
-        size: attachment.properties?.size || 0,
-        url: attachment.properties?.url || '',
-        createdAt: attachment.properties?.created_at || null
+        name: attachment.name || 'Untitled',
+        extension: attachment.extension || '',
+        type: attachment.type || '',
+        size: attachment.size || 0,
+        url: attachment.url || '',
+        createdAt: attachment.created_at || null,
+        // Debug info
+        raw_extension: attachment.extension,
+        raw_type: attachment.type
       }));
 
-    console.log(`Filtered to ${photoAttachments.length} photo attachments`);
+    console.log(`All attachments (before filtering):`, photoAttachments);
+
+    // Now apply photo filter
+    const filteredPhotoAttachments = photoAttachments.filter((attachment: any) => {
+      const extension = attachment.extension?.toLowerCase() || '';
+      const type = attachment.type?.toLowerCase() || '';
+      const isPhoto = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(extension) ||
+                      type.startsWith('image/');
+      console.log(`Attachment ${attachment.id}: extension="${extension}", type="${type}", isPhoto=${isPhoto}`);
+      return isPhoto;
+    });
+
+    console.log(`Filtered to ${filteredPhotoAttachments.length} photo attachments`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        attachments: photoAttachments,
-        count: photoAttachments.length
+        attachments: filteredPhotoAttachments,
+        count: filteredPhotoAttachments.length
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
