@@ -90,41 +90,42 @@ serve(async (req) => {
     const attachments = attachmentResults.filter(result => result !== null);
     console.log(`Found ${attachments.length} attachments`);
 
-    // Format the data (temporarily removing photo filter to debug)
+    // Format and filter attachments - only include valid photo attachments with URLs
     const photoAttachments = attachments
+      .filter((attachment: any) => {
+        // First check if attachment has a valid URL
+        const hasValidUrl = attachment.url && typeof attachment.url === 'string' && attachment.url.trim() !== '';
+        if (!hasValidUrl) {
+          console.log(`Skipping attachment ${attachment.id}: no valid URL`);
+          return false;
+        }
+        
+        // Then check if it's a photo format
+        const extension = attachment.extension?.toLowerCase() || '';
+        const type = attachment.type?.toLowerCase() || '';
+        const isPhoto = ['jpg', 'jpeg', 'png', 'heic', 'heif'].includes(extension) ||
+                        type.startsWith('image/');
+        
+        console.log(`Attachment ${attachment.id}: url="${attachment.url}", extension="${extension}", type="${type}", isPhoto=${isPhoto}`);
+        return isPhoto;
+      })
       .map((attachment: any) => ({
         id: attachment.id,
         name: attachment.name || 'Untitled',
         extension: attachment.extension || '',
         type: attachment.type || '',
         size: attachment.size || 0,
-        url: attachment.url || '',
+        url: attachment.url,
         createdAt: attachment.created_at || null,
-        // Debug info
-        raw_extension: attachment.extension,
-        raw_type: attachment.type
       }));
 
-    console.log(`All attachments (before filtering):`, photoAttachments);
-
-    // Now apply photo filter - match exactly with allowed upload formats  
-    const filteredPhotoAttachments = photoAttachments.filter((attachment: any) => {
-      const extension = attachment.extension?.toLowerCase() || '';
-      const type = attachment.type?.toLowerCase() || '';
-      // Only include image formats that are allowed for upload: jpg, jpeg, png, heic, heif
-      const isPhoto = ['jpg', 'jpeg', 'png', 'heic', 'heif'].includes(extension) ||
-                      type.startsWith('image/');
-      console.log(`Attachment ${attachment.id}: extension="${extension}", type="${type}", isPhoto=${isPhoto}`);
-      return isPhoto;
-    });
-
-    console.log(`Filtered to ${filteredPhotoAttachments.length} photo attachments`);
+    console.log(`Filtered to ${photoAttachments.length} valid photo attachments with URLs`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        attachments: filteredPhotoAttachments,
-        count: filteredPhotoAttachments.length
+        attachments: photoAttachments,
+        count: photoAttachments.length
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
