@@ -6,6 +6,7 @@ import { useHubSpotSearch } from "@/hooks/useHubSpotSearch";
 import { useTicketFormState } from "@/hooks/useTicketFormState";
 import { useTicketFormHandlers } from "@/hooks/useTicketFormHandlers";
 import { useUrlParams } from "@/hooks/useUrlParams";
+import { useContactSession } from "@/hooks/useContactSession";
 
 const SupportTicketForm = () => {
   const {
@@ -67,6 +68,14 @@ const SupportTicketForm = () => {
     setAutoSubmitted,
   });
 
+  // Contact session management (cookie-based persistence)
+  const { handleDisconnect } = useContactSession({
+    onAutoSubmit: handleSubmit,
+    setFormData,
+    setAutoSubmitted,
+    currentStep,
+  });
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="form-card w-full max-w-md mx-auto bg-white/95 backdrop-blur-sm">
@@ -104,6 +113,18 @@ const SupportTicketForm = () => {
           />
         </CardContent>
       </Card>
+      
+      {/* Disconnect link - only show when user is logged in (not on step 1) */}
+      {currentStep > 1 && (
+        <div className="text-center mt-4">
+          <button
+            onClick={handleDisconnect}
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors underline"
+          >
+            Déconnexion
+          </button>
+        </div>
+      )}
     </div>
   );
 };
