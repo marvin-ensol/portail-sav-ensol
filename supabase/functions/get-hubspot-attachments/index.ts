@@ -50,6 +50,8 @@ serve(async (req) => {
       const attachmentUrl = `https://api.hubapi.com/files/v3/files/${attachmentId}`;
       
       try {
+        console.log(`Fetching attachment ${attachmentId} from URL: ${attachmentUrl}`);
+        
         const response = await fetch(attachmentUrl, {
           method: 'GET',
           headers: {
@@ -58,13 +60,26 @@ serve(async (req) => {
           }
         });
 
+        console.log(`Response for attachment ${attachmentId}: status=${response.status}, content-type=${response.headers.get('content-type')}`);
+
         if (!response.ok) {
-          console.error(`Failed to fetch attachment ${attachmentId}:`, response.status);
+          const errorText = await response.text();
+          console.error(`Failed to fetch attachment ${attachmentId}:`, response.status, errorText);
           return null;
         }
 
-        const data = await response.json();
-        return data;
+        const responseText = await response.text();
+        console.log(`Raw response for attachment ${attachmentId}:`, responseText.substring(0, 200) + '...');
+        
+        try {
+          const data = JSON.parse(responseText);
+          console.log(`Successfully parsed JSON for attachment ${attachmentId}:`, data);
+          return data;
+        } catch (parseError) {
+          console.error(`Failed to parse JSON for attachment ${attachmentId}:`, parseError);
+          console.error(`Response was:`, responseText.substring(0, 500));
+          return null;
+        }
       } catch (error) {
         console.error(`Error fetching attachment ${attachmentId}:`, error);
         return null;
