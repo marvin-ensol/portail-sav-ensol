@@ -4,6 +4,7 @@ import StepRenderer from "./StepRenderer";
 import { useHubSpotSearch } from "@/hooks/useHubSpotSearch";
 import { useTicketFormState } from "@/hooks/useTicketFormState";
 import { useUrlParams } from "@/hooks/useUrlParams";
+import { supabase } from "@/integrations/supabase/client";
 import type { IdentificationMethod, TicketData, DealData } from "@/types/hubspot";
 
 const SupportTicketForm = () => {
@@ -99,17 +100,42 @@ const SupportTicketForm = () => {
   const handleTicketSubmit = async (description: string, files: File[]) => {
     setIsSubmittingTicket(true);
     try {
-      // TODO: Implement ticket creation API call
-      console.log('Creating ticket:', { description, files, deal: selectedDeal });
+      if (!searchResult?.contact?.contactId) {
+        console.error('No contact ID available');
+        return;
+      }
+
+      console.log('Creating ticket:', { 
+        contactId: searchResult.contact.contactId,
+        dealId: selectedDeal?.dealId,
+        description, 
+        files 
+      });
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Reset to initial state
-      resetForm();
-      resetSearch();
+      const { data, error } = await supabase.functions.invoke('create-hubspot-ticket', {
+        body: {
+          contactId: searchResult.contact.contactId,
+          dealId: selectedDeal?.dealId || null,
+          description
+        }
+      });
+
+      if (error) {
+        console.error('Error creating ticket:', error);
+        throw error;
+      }
+
+      if (data?.success) {
+        console.log('Ticket created successfully:', data.ticket);
+        // Reset to initial state
+        resetForm();
+        resetSearch();
+      } else {
+        throw new Error(data?.error || 'Failed to create ticket');
+      }
     } catch (error) {
       console.error('Error creating ticket:', error);
+      // TODO: Show error message to user
     } finally {
       setIsSubmittingTicket(false);
     }
