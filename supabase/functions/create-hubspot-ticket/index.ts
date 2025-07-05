@@ -151,56 +151,54 @@ serve(async (req) => {
 
     console.log('Ticket created successfully with ID:', ticketId)
 
-    // Create a note with the ticket description
-    console.log('Creating note for ticket:', ticketId)
+    // Create an email engagement for the ticket description
+    console.log('Creating email engagement for ticket:', ticketId)
     
-    let noteContent = `<b>Nouveau ticket soumis en ligne :</b><br>${description}<br><br>`
-    
-    if (files && files.length > 0 && uploadedFileIds.length > 0) {
-      noteContent += `<b>Fichiers joints :</b><br>`
-      files.forEach((file, index) => {
-        if (uploadedFileIds[index]) {
-          noteContent += `• ${file.name} (${(file.size / 1024).toFixed(1)} KB)<br>`
-        }
-      })
-      noteContent += `<br>`
-    }
-
-    const notePayload = {
+    const emailEngagementPayload = {
       properties: {
-        hs_note_body: noteContent,
-        hs_timestamp: Date.now()
+        hs_email_direction: "INCOMING",
+        hs_timestamp: new Date().toISOString(),
+        hs_email_status: "SENT",
+        subject: subject,
+        hs_email_text: description
       },
       associations: [
         {
-          to: {
-            id: ticketId
-          },
+          to: { id: contactId },
           types: [
             {
               associationCategory: "HUBSPOT_DEFINED",
-              associationTypeId: 228
+              associationTypeId: 198 // Contact <-> Email
+            }
+          ]
+        },
+        {
+          to: { id: ticketId },
+          types: [
+            {
+              associationCategory: "HUBSPOT_DEFINED",
+              associationTypeId: 224 // Ticket <-> Email
             }
           ]
         }
       ]
     }
 
-    const createNoteResponse = await fetch('https://api.hubapi.com/crm/v3/objects/notes', {
+    const createEmailResponse = await fetch('https://api.hubapi.com/crm/v3/objects/emails', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(notePayload)
+      body: JSON.stringify(emailEngagementPayload)
     })
 
-    if (!createNoteResponse.ok) {
-      const errorText = await createNoteResponse.text()
-      console.error('Failed to create note. Status:', createNoteResponse.status, 'Error:', errorText)
+    if (!createEmailResponse.ok) {
+      const errorText = await createEmailResponse.text()
+      console.error('Failed to create email engagement. Status:', createEmailResponse.status, 'Error:', errorText)
     } else {
-      const noteResult = await createNoteResponse.json()
-      console.log('Note created successfully with ID:', noteResult.id)
+      const emailResult = await createEmailResponse.json()
+      console.log('Email engagement created successfully with ID:', emailResult.id)
     }
 
     // Attach files using engagements API if files were uploaded
@@ -220,7 +218,7 @@ serve(async (req) => {
           id: parseInt(fileId)
         })),
         metadata: {
-          body: `Fichiers attachés: ${files?.map(f => f.name).join(', ')}`
+          body: `<b>${uploadedFileIds.length}</b> fichiers soumis via le formulaire`
         }
       }
 
