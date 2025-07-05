@@ -156,11 +156,14 @@ serve(async (req) => {
     
     const emailEngagementPayload = {
       properties: {
-        hs_email_direction: "INCOMING",
-        hs_timestamp: new Date().toISOString(),
+        hs_email_direction: "INCOMING_EMAIL",
+        hs_timestamp: Date.now(),
         hs_email_status: "SENT",
-        subject: subject,
-        hs_email_text: description
+        hs_email_subject: subject,
+        hs_email_text: description,
+        ...(uploadedFileIds.length > 0 && {
+          hs_attachment_ids: uploadedFileIds.join(';')
+        })
       },
       associations: [
         {
