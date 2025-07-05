@@ -107,11 +107,12 @@ serve(async (req) => {
 
     console.log(`All attachments (before filtering):`, photoAttachments);
 
-    // Now apply photo filter
+    // Now apply photo filter - match exactly with allowed upload formats  
     const filteredPhotoAttachments = photoAttachments.filter((attachment: any) => {
       const extension = attachment.extension?.toLowerCase() || '';
       const type = attachment.type?.toLowerCase() || '';
-      const isPhoto = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(extension) ||
+      // Only include image formats that are allowed for upload: jpg, jpeg, png, heic, heif
+      const isPhoto = ['jpg', 'jpeg', 'png', 'heic', 'heif'].includes(extension) ||
                       type.startsWith('image/');
       console.log(`Attachment ${attachment.id}: extension="${extension}", type="${type}", isPhoto=${isPhoto}`);
       return isPhoto;
