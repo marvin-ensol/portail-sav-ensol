@@ -71,6 +71,11 @@ const ContactSearch = ({ onSubmit, isLoading, autoSubmitted, initialFormData, se
     return digits.length === 10;
   };
 
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const generateEmailSuggestions = (email: string) => {
     const atIndex = email.lastIndexOf('@');
     if (atIndex === -1 || atIndex === email.length - 1) return [];
@@ -218,7 +223,8 @@ const ContactSearch = ({ onSubmit, isLoading, autoSubmitted, initialFormData, se
                 disabled={
                   !formData.value.trim() || 
                   isLoading || 
-                  (formData.method === "phone" && !validatePhoneNumber(formData.value))
+                  (formData.method === "phone" && !validatePhoneNumber(formData.value)) ||
+                  (formData.method === "email" && !validateEmail(formData.value))
                 }
                 className="w-full h-12 text-base font-medium"
               >

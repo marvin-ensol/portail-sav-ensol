@@ -59,21 +59,53 @@ serve(async (req) => {
     console.log(`Searching HubSpot for ${method} using property ${searchProperty}: ${searchValue}`);
 
     // Search for contact using HubSpot Search API
-    const searchPayload = {
-      filterGroups: [
-        {
-          filters: [
-            {
-              propertyName: searchProperty,
-              operator: 'EQ',
-              value: searchValue
-            }
-          ]
-        }
-      ],
-      properties: ['firstname', 'lastname', 'email', 'mobilephone'],
-      limit: 1
-    };
+    // Search both primary email and additional emails for email method
+    let searchPayload;
+    
+    if (method === 'email') {
+      // For email search, check multiple email properties
+      searchPayload = {
+        filterGroups: [
+          {
+            filters: [
+              {
+                propertyName: 'email',
+                operator: 'EQ',
+                value: searchValue
+              }
+            ]
+          },
+          {
+            filters: [
+              {
+                propertyName: 'hs_additional_emails',
+                operator: 'CONTAINS_TOKEN',
+                value: searchValue
+              }
+            ]
+          }
+        ],
+        properties: ['firstname', 'lastname', 'email', 'mobilephone', 'hs_additional_emails'],
+        limit: 1
+      };
+    } else {
+      // For phone search, use the original logic
+      searchPayload = {
+        filterGroups: [
+          {
+            filters: [
+              {
+                propertyName: searchProperty,
+                operator: 'EQ',
+                value: searchValue
+              }
+            ]
+          }
+        ],
+        properties: ['firstname', 'lastname', 'email', 'mobilephone'],
+        limit: 1
+      };
+    }
     
     console.log('HubSpot API request payload:', JSON.stringify(searchPayload, null, 2));
     
