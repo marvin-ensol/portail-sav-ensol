@@ -41,12 +41,16 @@ serve(async (req) => {
       
       for (const file of files) {
         try {
+          console.log('Processing file:', file.name, 'Size:', file.size, 'Type:', file.type)
+          
           // Decode base64 content
           const binaryString = atob(file.content)
           const bytes = new Uint8Array(binaryString.length)
           for (let i = 0; i < binaryString.length; i++) {
             bytes[i] = binaryString.charCodeAt(i)
           }
+          
+          console.log('File decoded successfully, size:', bytes.length, 'bytes')
           
           // Create FormData for file upload
           const formData = new FormData()
@@ -59,6 +63,7 @@ serve(async (req) => {
             overwrite: false
           }))
 
+          console.log('Uploading to HubSpot Files API...')
           const uploadResponse = await fetch('https://api.hubapi.com/files/v3/files', {
             method: 'POST',
             headers: {
@@ -67,19 +72,32 @@ serve(async (req) => {
             body: formData
           })
 
+          console.log('Upload response status:', uploadResponse.status)
+          
           if (uploadResponse.ok) {
             const uploadResult = await uploadResponse.json()
-            uploadedFileIds.push(uploadResult.objects[0].id)
-            console.log('File uploaded successfully:', file.name, 'ID:', uploadResult.objects[0].id)
+            console.log('Upload result:', JSON.stringify(uploadResult, null, 2))
+            
+            // Check if the response has the expected structure
+            if (uploadResult.objects && uploadResult.objects.length > 0) {
+              uploadedFileIds.push(uploadResult.objects[0].id)
+              console.log('File uploaded successfully:', file.name, 'ID:', uploadResult.objects[0].id)
+            } else if (uploadResult.id) {
+              // Alternative response structure
+              uploadedFileIds.push(uploadResult.id)
+              console.log('File uploaded successfully:', file.name, 'ID:', uploadResult.id)
+            } else {
+              console.log('Unexpected upload response structure:', uploadResult)
+            }
           } else {
             const errorText = await uploadResponse.text()
             console.error('Failed to upload file:', file.name, 'Status:', uploadResponse.status, 'Error:', errorText)
           }
         } catch (fileError) {
-          console.error('Error uploading file:', file.name, fileError)
+          console.error('Error uploading file:', file.name, 'Error:', fileError)
         }
       }
-      console.log('Total files uploaded successfully:', uploadedFileIds.length)
+      console.log('Total files uploaded successfully:', uploadedFileIds.length, 'File IDs:', uploadedFileIds)
     }
 
     // Create the ticket with file attachments
