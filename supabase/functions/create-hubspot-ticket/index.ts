@@ -168,20 +168,26 @@ serve(async (req) => {
     
     const noteData = {
       properties: {
-        hs_note_body: noteContent,
-        hs_timestamp: Date.now()
+        hs_note_body: noteContent
       },
       associations: [
         {
-          to: { id: ticketId },
-          types: [{ associationCategory: 'HUBSPOT_DEFINED', associationTypeId: 227 }] // Ticket to Note (corrected ID)
+          to: {
+            id: ticketId
+          },
+          types: [
+            {
+              associationCategory: "HUBSPOT_DEFINED",
+              associationTypeId: 227
+            }
+          ]
         }
       ]
     }
 
     console.log('Note data:', JSON.stringify(noteData, null, 2))
 
-    const createNoteResponse = await fetch(`${HUBSPOT_BASE_URL}/objects/notes`, {
+    const createNoteResponse = await fetch('https://api.hubapi.com/crm/v3/objects/notes', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
