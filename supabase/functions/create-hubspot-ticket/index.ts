@@ -154,13 +154,16 @@ serve(async (req) => {
     // Create an email engagement for the ticket description
     console.log('Creating email engagement for ticket:', ticketId)
     
+    // Convert line breaks to HTML for proper display
+    const htmlDescription = description.replace(/\n/g, '<br>')
+    
     const emailEngagementPayload = {
       properties: {
         hs_email_direction: "INCOMING_EMAIL",
         hs_timestamp: Date.now(),
         hs_email_status: "SENT",
         hs_email_subject: subject,
-        hs_email_html: description,
+        hs_email_html: htmlDescription,
         ...(uploadedFileIds.length > 0 && {
           hs_attachment_ids: uploadedFileIds.join(';')
         })
