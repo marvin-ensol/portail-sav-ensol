@@ -70,7 +70,7 @@ const SupportTicketForm = () => {
   });
 
   // Contact session management (cookie-based persistence)
-  const { handleDisconnect } = useContactSession({
+  const { handleDisconnect, handleSkipAutoVerification } = useContactSession({
     onAutoSubmit: handleSubmit,
     setFormData,
     setAutoSubmitted,
@@ -111,6 +111,7 @@ const SupportTicketForm = () => {
             onBackToDeals={handleBackToDeals}
             onTicketSubmit={handleTicketSubmit}
             onViewTickets={handleViewTickets}
+            onSkipAutoVerification={handleSkipAutoVerification}
           />
         </CardContent>
       </Card>

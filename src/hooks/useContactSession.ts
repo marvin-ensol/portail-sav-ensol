@@ -24,7 +24,18 @@ export const useContactSession = ({
       console.log('Found contact session, auto-submitting:', session);
       setFormData({ method: session.method, value: session.value });
       setAutoSubmitted(true);
-      onAutoSubmit(session.method, session.value);
+      
+      // Add timeout to prevent infinite loading
+      const timeoutId = setTimeout(() => {
+        console.warn('Auto-submission timed out, clearing session');
+        setAutoSubmitted(false);
+        clearContactSession();
+      }, 10000); // 10 second timeout
+      
+      onAutoSubmit(session.method, session.value)
+        .finally(() => {
+          clearTimeout(timeoutId);
+        });
     }
   }, [currentStep, onAutoSubmit, setFormData, setAutoSubmitted]);
 
@@ -33,5 +44,10 @@ export const useContactSession = ({
     window.location.reload();
   };
 
-  return { handleDisconnect };
+  const handleSkipAutoVerification = () => {
+    setAutoSubmitted(false);
+    clearContactSession();
+  };
+
+  return { handleDisconnect, handleSkipAutoVerification };
 };

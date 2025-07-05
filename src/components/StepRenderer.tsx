@@ -26,6 +26,7 @@ interface StepRendererProps {
   onBackToDeals: () => void;
   onTicketSubmit: (subject: string, description: string, files: File[]) => void;
   onViewTickets: () => void;
+  onSkipAutoVerification?: () => void;
 }
 
 const StepRenderer = ({
@@ -48,6 +49,7 @@ const StepRenderer = ({
   onBackToDeals,
   onTicketSubmit,
   onViewTickets,
+  onSkipAutoVerification,
 }: StepRendererProps) => {
   return (
     <>
@@ -60,6 +62,7 @@ const StepRenderer = ({
             autoSubmitted={autoSubmitted}
             initialFormData={formData}
             searchResult={searchResult}
+            onSkipAutoVerification={onSkipAutoVerification}
           />
         )}
       </div>
