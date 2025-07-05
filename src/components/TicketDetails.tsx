@@ -90,6 +90,14 @@ const TicketDetails = ({ ticket, deal, onBack }: TicketDetailsProps) => {
 
   const isTicketClosed = ticket.status === "4" || ticket.hs_pipeline_stage === "4";
   const closedDateText = isTicketClosed ? formatClosedDate(ticket.lastModified) : null;
+  
+  console.log('Ticket status debug:', {
+    status: ticket.status,
+    hs_pipeline_stage: ticket.hs_pipeline_stage,
+    lastModified: ticket.lastModified,
+    isTicketClosed,
+    closedDateText
+  });
 
   return (
     <div className="space-y-6">
