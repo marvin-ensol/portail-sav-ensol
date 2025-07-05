@@ -37,10 +37,9 @@ serve(async (req) => {
     // Create the ticket
     const ticketData = {
       properties: {
-        hs_pipeline: 'default',
         hs_pipeline_stage: '1',
         subject: 'Ticket',
-        content: description
+        hs_ticket_body: description
       },
       associations: [
         {
@@ -69,9 +68,11 @@ serve(async (req) => {
 
     if (!createTicketResponse.ok) {
       const errorText = await createTicketResponse.text()
-      console.error('Failed to create ticket:', errorText)
+      console.error('Failed to create ticket. Status:', createTicketResponse.status)
+      console.error('Error response:', errorText)
+      console.error('Request data was:', JSON.stringify(ticketData, null, 2))
       return Response.json(
-        { success: false, error: 'Failed to create ticket' },
+        { success: false, error: `Failed to create ticket: ${createTicketResponse.status} - ${errorText}` },
         { status: 500, headers: corsHeaders }
       )
     }
