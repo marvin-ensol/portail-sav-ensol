@@ -22,15 +22,24 @@ const ContactSearch = ({ onSubmit, isLoading, autoSubmitted, initialFormData, se
 
   const commonEmailDomains = [
     'gmail.com',
-    'free.fr', 
-    'yahoo.fr',
-    'live.fr',
     'hotmail.fr',
+    'hotmail.com', 
+    'yahoo.fr',
+    'yahoo.com',
     'outlook.fr',
+    'outlook.com',
+    'free.fr',
     'orange.fr',
-    'wanadoo.fr',
     'laposte.net',
-    'sfr.fr'
+    'sfr.fr',
+    'wanadoo.fr',
+    'live.fr',
+    'aol.com',
+    'icloud.com',
+    'zoho.com',
+    'gmx.com',
+    'club-internet.fr',
+    'msn.com'
   ];
 
   const identificationOptions = [
