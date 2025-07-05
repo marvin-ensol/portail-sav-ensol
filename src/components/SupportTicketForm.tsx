@@ -77,7 +77,7 @@ const SupportTicketForm = () => {
   });
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4">
       <Card className="form-card w-full max-w-md mx-auto bg-white/95 backdrop-blur-sm">
         <TicketFormHeader 
           currentStep={currentStep}
@@ -116,10 +116,10 @@ const SupportTicketForm = () => {
       
       {/* Disconnect link - only show when user is logged in (not on step 1) */}
       {currentStep > 1 && (
-        <div className="text-center mt-4">
+        <div className="mt-6">
           <button
             onClick={handleDisconnect}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors underline"
+            className="text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200 px-3 py-1.5 rounded-full"
           >
             Déconnexion
           </button>
