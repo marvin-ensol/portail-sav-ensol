@@ -124,14 +124,19 @@ const SupportTicketForm = () => {
       // Convert files to base64 for transfer
       const filesWithContent = await Promise.all(
         files.map(async (file) => {
-          const arrayBuffer = await file.arrayBuffer();
-          const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-          return {
-            name: file.name,
-            size: file.size,
-            type: file.type,
-            content: base64
-          };
+          return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              const base64 = (reader.result as string).split(',')[1]; // Remove data:mime;base64, prefix
+              resolve({
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                content: base64
+              });
+            };
+            reader.readAsDataURL(file);
+          });
         })
       );
       
