@@ -13,6 +13,7 @@ export interface TicketData {
   priority: string;
   createdDate: string | null;
   lastModified: string | null;
+  hs_pipeline_stage: string;
 }
 
 export interface DealData {

@@ -29,11 +29,11 @@ const DealsList = ({ deals, isLoading, onDealClick }: DealsListProps) => {
               if (!dateString) return 'Non encore installé';
               try {
                 const date = new Date(dateString);
-                return date.toLocaleDateString('fr-FR', {
+                return `Installé le ${date.toLocaleDateString('fr-FR', {
                   day: '2-digit',
                   month: '2-digit',
                   year: '2-digit'
-                });
+                })}`;
               } catch {
                 return 'Date invalide';
               }
