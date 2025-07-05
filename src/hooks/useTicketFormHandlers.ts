@@ -8,11 +8,13 @@ interface UseTicketFormHandlersProps {
   searchResult: any;
   deals: DealData[];
   selectedDeal: DealData | null;
+  selectedTicket: TicketData | null;
   isSubmittingTicket: boolean;
   goToStep: (step: number) => void;
   resetForm: () => void;
   resetSearch: () => void;
   setSelectedDeal: (deal: DealData | null) => void;
+  setSelectedTicket: (ticket: TicketData | null) => void;
   setIsSubmittingTicket: (submitting: boolean) => void;
 }
 
@@ -23,11 +25,13 @@ export const useTicketFormHandlers = ({
   searchResult,
   deals,
   selectedDeal,
+  selectedTicket,
   isSubmittingTicket,
   goToStep,
   resetForm,
   resetSearch,
   setSelectedDeal,
+  setSelectedTicket,
   setIsSubmittingTicket,
 }: UseTicketFormHandlersProps) => {
   const handleSubmit = async (method: IdentificationMethod, value: string) => {
@@ -67,8 +71,8 @@ export const useTicketFormHandlers = ({
   };
 
   const handleTicketClick = (ticket: TicketData) => {
-    // TODO: Navigate to ticket details or handle ticket selection
-    console.log('Ticket clicked:', ticket);
+    setSelectedTicket(ticket);
+    goToStep(6); // Navigate to ticket details step
   };
 
   const handleTryAgain = () => {
@@ -83,6 +87,11 @@ export const useTicketFormHandlers = ({
   const handleBackToDeals = () => {
     setSelectedDeal(null);
     goToStep(3);
+  };
+
+  const handleBackFromTicketDetails = () => {
+    setSelectedTicket(null);
+    goToStep(2); // Go back to tickets list
   };
 
   const handleViewTickets = async () => {
@@ -166,6 +175,7 @@ export const useTicketFormHandlers = ({
     handleTryAgain,
     handleBackToTickets,
     handleBackToDeals,
+    handleBackFromTicketDetails,
     handleViewTickets,
     handleTicketSubmit,
   };

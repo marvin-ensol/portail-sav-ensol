@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { FormData, DealData } from "@/types/hubspot";
+import type { FormData, DealData, TicketData } from "@/types/hubspot";
 
 export const useTicketFormState = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -9,6 +9,7 @@ export const useTicketFormState = () => {
   });
   const [autoSubmitted, setAutoSubmitted] = useState(false);
   const [selectedDeal, setSelectedDeal] = useState<DealData | null>(null);
+  const [selectedTicket, setSelectedTicket] = useState<TicketData | null>(null);
   const [isSubmittingTicket, setIsSubmittingTicket] = useState(false);
 
   const goToStep = (step: number) => {
@@ -21,6 +22,7 @@ export const useTicketFormState = () => {
     setFormData({ method: "phone", value: "" });
     setAutoSubmitted(false);
     setSelectedDeal(null);
+    setSelectedTicket(null);
     setIsSubmittingTicket(false);
   };
 
@@ -29,10 +31,12 @@ export const useTicketFormState = () => {
     formData,
     autoSubmitted,
     selectedDeal,
+    selectedTicket,
     isSubmittingTicket,
     setFormData,
     setAutoSubmitted,
     setSelectedDeal,
+    setSelectedTicket,
     setIsSubmittingTicket,
     goToStep,
     resetForm,

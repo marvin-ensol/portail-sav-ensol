@@ -13,10 +13,12 @@ const SupportTicketForm = () => {
     formData,
     autoSubmitted,
     selectedDeal,
+    selectedTicket,
     isSubmittingTicket,
     setFormData,
     setAutoSubmitted,
     setSelectedDeal,
+    setSelectedTicket,
     setIsSubmittingTicket,
     goToStep,
     resetForm,
@@ -43,6 +45,7 @@ const SupportTicketForm = () => {
     handleTryAgain,
     handleBackToTickets,
     handleBackToDeals,
+    handleBackFromTicketDetails,
     handleViewTickets,
     handleTicketSubmit,
   } = useTicketFormHandlers({
@@ -52,11 +55,13 @@ const SupportTicketForm = () => {
     searchResult,
     deals,
     selectedDeal,
+    selectedTicket,
     isSubmittingTicket,
     goToStep,
     resetForm,
     resetSearch,
     setSelectedDeal,
+    setSelectedTicket,
     setIsSubmittingTicket,
   });
 
@@ -77,8 +82,13 @@ const SupportTicketForm = () => {
         
         <CardContent className="space-y-6">
           {/* Progress indicator at top */}
-          {currentStep < 5 && (
-            <ProgressIndicator currentStep={currentStep} totalSteps={currentStep === 4 ? 4 : 3} />
+          {currentStep < 5 && currentStep !== 6 && (
+            <ProgressIndicator currentStep={currentStep === 6 ? 3 : currentStep} totalSteps={currentStep === 4 ? 4 : 3} />
+          )}
+          
+          {/* Special progress indicator for ticket details */}
+          {currentStep === 6 && (
+            <ProgressIndicator currentStep={3} totalSteps={3} />
           )}
           
           <StepRenderer
@@ -86,6 +96,7 @@ const SupportTicketForm = () => {
             formData={formData}
             autoSubmitted={autoSubmitted}
             selectedDeal={selectedDeal}
+            selectedTicket={selectedTicket}
             isSubmittingTicket={isSubmittingTicket}
             searchResult={searchResult}
             tickets={tickets}
@@ -99,6 +110,7 @@ const SupportTicketForm = () => {
             onDealClick={handleDealClick}
             onBackToTickets={handleBackToTickets}
             onBackToDeals={handleBackToDeals}
+            onBackFromTicketDetails={handleBackFromTicketDetails}
             onTicketSubmit={handleTicketSubmit}
             onViewTickets={handleViewTickets}
           />

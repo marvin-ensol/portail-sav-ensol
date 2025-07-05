@@ -4,6 +4,7 @@ import ContactSearch from "./ContactSearch";
 import TicketsList from "./TicketsList";
 import DealsList from "./DealsList";
 import TicketCreationForm from "./TicketCreationForm";
+import TicketDetails from "./TicketDetails";
 import type { FormData, IdentificationMethod, TicketData, DealData, SearchResult } from "@/types/hubspot";
 
 interface StepRendererProps {
@@ -11,6 +12,7 @@ interface StepRendererProps {
   formData: FormData;
   autoSubmitted: boolean;
   selectedDeal: DealData | null;
+  selectedTicket: TicketData | null;
   isSubmittingTicket: boolean;
   searchResult: SearchResult | null;
   tickets: TicketData[];
@@ -24,6 +26,7 @@ interface StepRendererProps {
   onDealClick: (deal: DealData) => void;
   onBackToTickets: () => void;
   onBackToDeals: () => void;
+  onBackFromTicketDetails: () => void;
   onTicketSubmit: (subject: string, description: string, files: File[]) => void;
   onViewTickets: () => void;
 }
@@ -33,6 +36,7 @@ const StepRenderer = ({
   formData,
   autoSubmitted,
   selectedDeal,
+  selectedTicket,
   isSubmittingTicket,
   searchResult,
   tickets,
@@ -46,9 +50,17 @@ const StepRenderer = ({
   onDealClick,
   onBackToTickets,
   onBackToDeals,
+  onBackFromTicketDetails,
   onTicketSubmit,
   onViewTickets,
 }: StepRendererProps) => {
+  // Find the deal associated with the selected ticket
+  const getTicketDeal = (ticket: TicketData | null): DealData | undefined => {
+    if (!ticket) return undefined;
+    // For now, we'll use the selected deal if available
+    // In a real scenario, you might need to fetch the deal based on ticket data
+    return selectedDeal || undefined;
+  };
   return (
     <>
       {/* Step 1: Contact Search */}
@@ -138,6 +150,15 @@ const StepRenderer = ({
             Voir mes demandes
           </Button>
         </div>
+      )}
+
+      {/* Step 6: Ticket Details */}
+      {currentStep === 6 && selectedTicket && (
+        <TicketDetails
+          ticket={selectedTicket}
+          deal={getTicketDeal(selectedTicket)}
+          onBack={onBackFromTicketDetails}
+        />
       )}
     </>
   );

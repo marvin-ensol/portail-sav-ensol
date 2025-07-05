@@ -18,6 +18,9 @@ const TicketFormHeader = ({ currentStep, searchResult }: TicketFormHeaderProps) 
     if (currentStep === 5) {
       return "Demande envoyée";
     }
+    if (currentStep === 6) {
+      return "Support Ensol";
+    }
     return "Support Ensol";
   };
 
@@ -28,6 +31,8 @@ const TicketFormHeader = ({ currentStep, searchResult }: TicketFormHeaderProps) 
         return "Envoi d'une nouvelle demande";
       case 5:
         return "Notre équipe étudie votre demande et vous contactera dans les plus brefs délais";
+      case 6:
+        return "Détail de votre demande";
       default:
         return "Suivi de vos demandes d'assistance";
     }
