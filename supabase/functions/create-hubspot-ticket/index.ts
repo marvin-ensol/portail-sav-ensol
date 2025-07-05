@@ -151,25 +151,6 @@ serve(async (req) => {
 
     console.log('Ticket created successfully with ID:', ticketId)
 
-    // Get contact details for email properties
-    console.log('Fetching contact details for email properties')
-    const contactResponse = await fetch(`${HUBSPOT_BASE_URL}/objects/contacts/${contactId}?properties=email`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json'
-      }
-    })
-    
-    let contactEmail = ''
-    if (contactResponse.ok) {
-      const contactData = await contactResponse.json()
-      contactEmail = contactData.properties?.email || ''
-      console.log('Contact email:', contactEmail)
-    } else {
-      console.error('Failed to fetch contact details for email')
-    }
-
     // Create an email engagement for the ticket description
     console.log('Creating email engagement for ticket:', ticketId)
     
@@ -180,8 +161,6 @@ serve(async (req) => {
         hs_email_status: "SENT",
         hs_email_subject: subject,
         hs_email_text: description,
-        hs_email_sender: contactEmail,
-        hs_email_recipient: "sav@goensol.com",
         ...(uploadedFileIds.length > 0 && {
           hs_attachment_ids: uploadedFileIds.join(';')
         })
