@@ -10,7 +10,7 @@ const MessageAttachments = ({ attachments, isClient, onPhotoClick }: MessageAtta
   if (!attachments || attachments.length === 0) return null;
 
   return (
-    <div className={`flex flex-wrap gap-2 mb-2 ${isClient ? 'justify-end' : 'justify-start'}`}>
+    <div className={`flex flex-wrap gap-2 ${isClient ? 'justify-end' : 'justify-start'}`}>
       {attachments.map((attachment) => (
         <div
           key={attachment.id}

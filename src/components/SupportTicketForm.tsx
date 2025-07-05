@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import ProgressIndicator from "./ProgressIndicator";
 import StepRenderer from "./StepRenderer";
 import TicketFormHeader from "./TicketFormHeader";
@@ -86,9 +87,9 @@ const SupportTicketForm = () => {
             <ProgressIndicator currentStep={currentStep === 6 ? 3 : currentStep} totalSteps={currentStep === 4 ? 4 : 3} />
           )}
           
-          {/* Special progress indicator for ticket details */}
+          {/* Horizontal divider for ticket details */}
           {currentStep === 6 && (
-            <ProgressIndicator currentStep={3} totalSteps={3} />
+            <Separator className="my-2" />
           )}
           
           <StepRenderer

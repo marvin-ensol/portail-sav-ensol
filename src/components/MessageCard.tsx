@@ -28,7 +28,7 @@ const MessageCard = ({ message, attachments, onPhotoClick }: MessageCardProps) =
 
   return (
     <div className={`flex ${message.isClient ? 'justify-end' : 'justify-start'}`}>
-      <div className="max-w-[80%]">
+      <div className="max-w-[80%] space-y-2">
         <Card className={`${message.isClient ? 'bg-message-client' : 'bg-message-ensol'} text-foreground border-0`}>
           <CardContent className="p-3">
             <div 
