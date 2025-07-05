@@ -69,7 +69,12 @@ const SupportTicketForm = () => {
   };
 
   const handleNewTicket = () => {
-    goToStep(3);
+    // If no deals found, skip directly to ticket creation form
+    if (deals.length === 0) {
+      goToStep(4);
+    } else {
+      goToStep(3);
+    }
   };
 
   const handleTicketClick = (ticket: TicketData) => {
