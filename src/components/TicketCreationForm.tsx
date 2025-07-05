@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { ArrowLeft } from "lucide-react";
 import DealInfoCard from "./DealInfoCard";
 import FileUploadArea from "./FileUploadArea";
@@ -11,13 +12,14 @@ import type { DealData } from "@/types/hubspot";
 
 interface TicketCreationFormProps {
   deal?: DealData;
-  onSubmit: (description: string, files: File[]) => void;
+  onSubmit: (subject: string, description: string, files: File[]) => void;
   onBack: () => void;
   isSubmitting?: boolean;
 }
 
 const TicketCreationForm = ({ deal, onSubmit, onBack, isSubmitting = false }: TicketCreationFormProps) => {
   const [description, setDescription] = useState("");
+  const [subject, setSubject] = useState("");
   
   const {
     attachedFiles,
@@ -33,7 +35,7 @@ const TicketCreationForm = ({ deal, onSubmit, onBack, isSubmitting = false }: Ti
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(description, attachedFiles);
+    onSubmit(subject, description, attachedFiles);
   };
 
   return (
@@ -47,6 +49,18 @@ const TicketCreationForm = ({ deal, onSubmit, onBack, isSubmitting = false }: Ti
 
       {/* Ticket Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Subject Field */}
+        <div className="space-y-2">
+          <Label htmlFor="subject">Objet</Label>
+          <Input
+            id="subject"
+            placeholder="L'objet de votre demande en une phrase"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            required
+          />
+        </div>
+
         {/* Description Field */}
         <div className="space-y-2">
           <Label htmlFor="description">Description du problème</Label>
@@ -82,7 +96,7 @@ const TicketCreationForm = ({ deal, onSubmit, onBack, isSubmitting = false }: Ti
           <Button
             type="submit"
             className="w-full h-12 text-base font-medium"
-            disabled={isSubmitting || !description.trim()}
+            disabled={isSubmitting || !description.trim() || !subject.trim()}
           >
             {isSubmitting ? "Envoi en cours..." : "Envoyer"}
           </Button>

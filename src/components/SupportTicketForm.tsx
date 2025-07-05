@@ -105,7 +105,7 @@ const SupportTicketForm = () => {
     goToStep(2);
   };
 
-  const handleTicketSubmit = async (description: string, files: File[]) => {
+  const handleTicketSubmit = async (subject: string, description: string, files: File[]) => {
     setIsSubmittingTicket(true);
     try {
       if (!searchResult?.contact?.contactId) {
@@ -116,6 +116,7 @@ const SupportTicketForm = () => {
       console.log('Creating ticket:', { 
         contactId: searchResult.contact.contactId,
         dealId: selectedDeal?.dealId,
+        subject,
         description, 
         files 
       });
@@ -124,7 +125,13 @@ const SupportTicketForm = () => {
         body: {
           contactId: searchResult.contact.contactId,
           dealId: selectedDeal?.dealId || null,
-          description
+          subject,
+          description,
+          files: files.map(file => ({
+            name: file.name,
+            size: file.size,
+            type: file.type
+          }))
         }
       });
 

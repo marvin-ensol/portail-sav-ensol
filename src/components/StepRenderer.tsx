@@ -24,7 +24,7 @@ interface StepRendererProps {
   onDealClick: (deal: DealData) => void;
   onBackToTickets: () => void;
   onBackToDeals: () => void;
-  onTicketSubmit: (description: string, files: File[]) => void;
+  onTicketSubmit: (subject: string, description: string, files: File[]) => void;
   onViewTickets: () => void;
 }
 

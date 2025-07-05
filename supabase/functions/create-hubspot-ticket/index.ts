@@ -14,11 +14,11 @@ serve(async (req) => {
   }
 
   try {
-    const { contactId, dealId, description } = await req.json()
+    const { contactId, dealId, subject, description, files } = await req.json()
 
-    if (!contactId || !description) {
+    if (!contactId || !subject || !description) {
       return Response.json(
-        { success: false, error: 'Contact ID and description are required' },
+        { success: false, error: 'Contact ID, subject, and description are required' },
         { status: 400, headers: corsHeaders }
       )
     }
@@ -32,13 +32,13 @@ serve(async (req) => {
       )
     }
 
-    console.log('Creating ticket for contact:', contactId, 'deal:', dealId)
+    console.log('Creating ticket for contact:', contactId, 'deal:', dealId, 'subject:', subject)
 
     // Create the ticket
     const ticketData = {
       properties: {
         hs_pipeline_stage: '1',
-        subject: 'Ticket'
+        subject: subject
       },
       associations: [
         {
@@ -127,7 +127,7 @@ serve(async (req) => {
         success: true, 
         ticket: {
           id: ticketId,
-          subject: 'Ticket'
+          subject: subject
         }
       },
       { status: 200, headers: corsHeaders }
