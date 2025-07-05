@@ -41,11 +41,14 @@ const MessageCard = ({ message, attachments, onPhotoClick }: MessageCardProps) =
         </Card>
         
         <div className={`flex flex-col ${message.isClient ? 'items-end' : 'items-start'}`}>
-          <MessageAttachments 
-            attachments={attachments || []}
-            isClient={message.isClient}
-            onPhotoClick={onPhotoClick}
-          />
+          {/* Photo attachments - only render container if attachments exist */}
+          {attachments && attachments.length > 0 && (
+            <MessageAttachments 
+              attachments={attachments}
+              isClient={message.isClient}
+              onPhotoClick={onPhotoClick}
+            />
+          )}
           
           {/* Timestamp */}
           <span className="text-xs text-muted-foreground">

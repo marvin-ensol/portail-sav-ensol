@@ -12,7 +12,8 @@ const PhotoModal = ({ photo, onClose, onDownload }: PhotoModalProps) => {
 
   return (
     <div 
-      className="fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center p-4"
+      className="fixed inset-0 z-[9999] bg-black bg-opacity-75 flex items-center justify-center p-4"
+      style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
       onClick={onClose}
     >
       <div 
