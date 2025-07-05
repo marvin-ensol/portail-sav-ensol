@@ -16,9 +16,9 @@ serve(async (req) => {
   try {
     const { contactId, dealId, description } = await req.json()
 
-    if (!contactId) {
+    if (!contactId || !description) {
       return Response.json(
-        { success: false, error: 'Contact ID is required' },
+        { success: false, error: 'Contact ID and description are required' },
         { status: 400, headers: corsHeaders }
       )
     }
@@ -80,6 +80,41 @@ serve(async (req) => {
     const ticketId = ticketResult.id
 
     console.log('Ticket created successfully with ID:', ticketId)
+
+    // Create a note associated with the ticket
+    const noteContent = `<b>Nouveau ticket soumis en ligne :</b>\n${description}\n\n`
+    
+    const noteData = {
+      properties: {
+        hs_note_body: noteContent,
+        hs_timestamp: new Date().toISOString()
+      },
+      associations: [
+        {
+          to: { id: ticketId },
+          types: [{ associationCategory: 'HUBSPOT_DEFINED', associationTypeId: 214 }] // Note to Ticket
+        }
+      ]
+    }
+
+    const createNoteResponse = await fetch(`${HUBSPOT_BASE_URL}/objects/notes`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(noteData)
+    })
+
+    if (!createNoteResponse.ok) {
+      const errorText = await createNoteResponse.text()
+      console.error('Failed to create note:', errorText)
+      // Don't fail the entire operation if note creation fails
+      console.log('Ticket created successfully, but note creation failed')
+    } else {
+      const noteResult = await createNoteResponse.json()
+      console.log('Note created with ID:', noteResult.id)
+    }
 
     return Response.json(
       { 

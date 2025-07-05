@@ -97,6 +97,10 @@ const SupportTicketForm = () => {
     goToStep(3);
   };
 
+  const handleViewTickets = () => {
+    goToStep(2);
+  };
+
   const handleTicketSubmit = async (description: string, files: File[]) => {
     setIsSubmittingTicket(true);
     try {
@@ -127,9 +131,8 @@ const SupportTicketForm = () => {
 
       if (data?.success) {
         console.log('Ticket created successfully:', data.ticket);
-        // Reset to initial state
-        resetForm();
-        resetSearch();
+        // Go to success page instead of resetting
+        goToStep(5);
       } else {
         throw new Error(data?.error || 'Failed to create ticket');
       }
@@ -148,6 +151,8 @@ const SupportTicketForm = () => {
            <CardTitle className="text-2xl font-bold gradient-text">
             {currentStep === 2 && searchResult?.found && searchResult.contact?.firstname 
               ? `Bonjour, ${searchResult.contact.firstname}` 
+              : currentStep === 5
+              ? "Demande envoyée"
               : "Support Ensol"
             }
           </CardTitle>
@@ -156,6 +161,8 @@ const SupportTicketForm = () => {
               ? "Envoi d'une nouvelle demande"
               : currentStep === 4
               ? "Envoi d'une nouvelle demande"
+              : currentStep === 5
+              ? "Notre équipe étudie votre demande et vous contactera dans les plus brefs délais"
               : "Suivi de vos demandes d'assistance"
             }
           </CardDescription>
@@ -163,7 +170,9 @@ const SupportTicketForm = () => {
         
         <CardContent className="space-y-6">
           {/* Progress indicator at top */}
-          <ProgressIndicator currentStep={currentStep} totalSteps={currentStep === 4 ? 4 : 3} />
+          {currentStep < 5 && (
+            <ProgressIndicator currentStep={currentStep} totalSteps={currentStep === 4 ? 4 : 3} />
+          )}
           
           <StepRenderer
             currentStep={currentStep}
@@ -184,6 +193,7 @@ const SupportTicketForm = () => {
             onBackToTickets={handleBackToTickets}
             onBackToDeals={handleBackToDeals}
             onTicketSubmit={handleTicketSubmit}
+            onViewTickets={handleViewTickets}
           />
         </CardContent>
       </Card>

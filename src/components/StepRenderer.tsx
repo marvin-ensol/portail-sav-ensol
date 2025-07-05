@@ -25,6 +25,7 @@ interface StepRendererProps {
   onBackToTickets: () => void;
   onBackToDeals: () => void;
   onTicketSubmit: (description: string, files: File[]) => void;
+  onViewTickets: () => void;
 }
 
 const StepRenderer = ({
@@ -46,6 +47,7 @@ const StepRenderer = ({
   onBackToTickets,
   onBackToDeals,
   onTicketSubmit,
+  onViewTickets,
 }: StepRendererProps) => {
   return (
     <>
@@ -118,6 +120,24 @@ const StepRenderer = ({
           onBack={selectedDeal ? onBackToDeals : onBackToTickets}
           isSubmitting={isSubmittingTicket}
         />
+      )}
+
+      {/* Step 5: Success Page */}
+      {currentStep === 5 && (
+        <div className="text-center space-y-4">
+          <div className="text-green-600 mb-4">
+            <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          
+          <Button
+            onClick={onViewTickets}
+            className="w-full h-12 text-base font-medium"
+          >
+            Voir mes demandes
+          </Button>
+        </div>
       )}
     </>
   );
