@@ -111,11 +111,11 @@ const StepRenderer = ({
       )}
 
       {/* Step 4: Ticket Creation Form */}
-      {currentStep === 4 && selectedDeal && (
+      {currentStep === 4 && (
         <TicketCreationForm
-          deal={selectedDeal}
+          deal={selectedDeal || undefined}
           onSubmit={onTicketSubmit}
-          onBack={onBackToDeals}
+          onBack={selectedDeal ? onBackToDeals : onBackToTickets}
           isSubmitting={isSubmittingTicket}
         />
       )}

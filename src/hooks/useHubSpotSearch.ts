@@ -97,15 +97,19 @@ export const useHubSpotSearch = () => {
 
       if (error) {
         console.error('Supabase function error:', error);
-        return;
+        return [];
       }
 
       if (data.success && data.deals) {
         setDeals(data.deals);
         console.log(`Found ${data.deals.length} deals`);
+        return data.deals;
       }
+      
+      return [];
     } catch (error) {
       console.error('Error searching deals:', error);
+      return [];
     } finally {
       setDealsLoading(false);
     }

@@ -39,14 +39,20 @@ const SupportTicketForm = () => {
     
     // If contact found, search for tickets and deals
     if (result?.found && result.contact) {
-      const [foundTickets] = await Promise.all([
+      const [foundTickets, foundDeals] = await Promise.all([
         searchTickets(result.contact.contactId),
         searchDeals(result.contact.contactId)
       ]);
       
-      // If no tickets found, skip directly to deals selection (step 3)
-      // Otherwise go to tickets list (step 2)
-      goToStep(foundTickets.length > 0 ? 2 : 3);
+      // If no tickets found, check deals
+      if (foundTickets.length > 0) {
+        goToStep(2); // Go to tickets list
+      } else if (foundDeals && foundDeals.length > 0) {
+        goToStep(3); // Go to deals selection
+      } else {
+        // No tickets and no deals - go directly to ticket creation form
+        goToStep(4);
+      }
     }
   };
 
@@ -109,7 +115,7 @@ const SupportTicketForm = () => {
       <Card className="form-card w-full max-w-md mx-auto bg-white/95 backdrop-blur-sm">
         <CardHeader className="text-center">
            <CardTitle className="text-2xl font-bold gradient-text">
-            {(currentStep === 2 || currentStep === 3) && searchResult?.found && searchResult.contact?.firstname 
+            {currentStep === 2 && searchResult?.found && searchResult.contact?.firstname 
               ? `Bonjour, ${searchResult.contact.firstname}` 
               : "Support Ensol"
             }

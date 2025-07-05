@@ -10,7 +10,7 @@ import { useFileUpload } from "@/hooks/useFileUpload";
 import type { DealData } from "@/types/hubspot";
 
 interface TicketCreationFormProps {
-  deal: DealData;
+  deal?: DealData;
   onSubmit: (description: string, files: File[]) => void;
   onBack: () => void;
   isSubmitting?: boolean;
@@ -42,8 +42,8 @@ const TicketCreationForm = ({ deal, onSubmit, onBack, isSubmitting = false }: Ti
         Comment pouvons-nous vous aider ?
       </h2>
 
-      {/* Deal Information Card */}
-      <DealInfoCard deal={deal} />
+      {/* Deal Information Card - only show if deal is provided */}
+      {deal && <DealInfoCard deal={deal} />}
 
       {/* Ticket Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
