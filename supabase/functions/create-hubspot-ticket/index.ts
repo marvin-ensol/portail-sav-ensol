@@ -186,31 +186,40 @@ serve(async (req) => {
       ]
     }, null, 2))
 
+    const notePayload: any = {
+      properties: {
+        hs_note_body: noteContent,
+        hs_timestamp: Date.now()
+      },
+      associations: [
+        {
+          to: {
+            id: ticketId
+          },
+          types: [
+            {
+              associationCategory: "HUBSPOT_DEFINED",
+              associationTypeId: 228
+            }
+          ]
+        }
+      ]
+    }
+
+    // Add attachments if files were uploaded
+    if (uploadedFileIds.length > 0) {
+      notePayload.attachments = uploadedFileIds.map(fileId => ({
+        id: fileId
+      }))
+    }
+
     const createNoteResponse = await fetch('https://api.hubapi.com/crm/v3/objects/notes', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        properties: {
-          hs_note_body: noteContent,
-          hs_timestamp: Date.now()
-        },
-        associations: [
-          {
-            to: {
-              id: ticketId
-            },
-            types: [
-              {
-                associationCategory: "HUBSPOT_DEFINED",
-                associationTypeId: 228
-              }
-            ]
-          }
-        ]
-      })
+      body: JSON.stringify(notePayload)
     })
 
     console.log('Note creation response status:', createNoteResponse.status)
@@ -224,45 +233,6 @@ serve(async (req) => {
     } else {
       const noteResult = await createNoteResponse.json()
       console.log('Comprehensive note created successfully with ID:', noteResult.id)
-      
-      // If files were uploaded, attach them to the note using engagements
-      if (uploadedFileIds.length > 0) {
-        console.log('Attaching files to note via engagement')
-        
-        const engagementData = {
-          engagement: {
-            active: true,
-            type: 'NOTE',
-            timestamp: Date.now()
-          },
-          associations: {
-            ticketIds: [parseInt(ticketId)]
-          },
-          attachments: uploadedFileIds.map(fileId => ({
-            id: fileId
-          })),
-          metadata: {
-            body: `Fichiers attachés: ${files?.map(f => f.name).join(', ')}`
-          }
-        }
-
-        const createEngagementResponse = await fetch('https://api.hubapi.com/engagements/v1/engagements', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(engagementData)
-        })
-
-        if (!createEngagementResponse.ok) {
-          const errorText = await createEngagementResponse.text()
-          console.error('Failed to create file engagement. Status:', createEngagementResponse.status, 'Error:', errorText)
-        } else {
-          const engagementResult = await createEngagementResponse.json()
-          console.log('File engagement created successfully with ID:', engagementResult.engagement.id)
-        }
-      }
     }
 
     return Response.json(
