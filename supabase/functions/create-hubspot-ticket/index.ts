@@ -151,6 +151,25 @@ serve(async (req) => {
 
     console.log('Ticket created successfully with ID:', ticketId)
 
+    // Get contact details for email properties
+    console.log('Fetching contact details for email properties')
+    const contactResponse = await fetch(`${HUBSPOT_BASE_URL}/objects/contacts/${contactId}?properties=email`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      }
+    })
+    
+    let contactEmail = ''
+    if (contactResponse.ok) {
+      const contactData = await contactResponse.json()
+      contactEmail = contactData.properties?.email || ''
+      console.log('Contact email:', contactEmail)
+    } else {
+      console.error('Failed to fetch contact details for email')
+    }
+
     // Create an email engagement for the ticket description
     console.log('Creating email engagement for ticket:', ticketId)
     
@@ -161,6 +180,8 @@ serve(async (req) => {
         hs_email_status: "SENT",
         hs_email_subject: subject,
         hs_email_text: description,
+        hs_email_sender: contactEmail,
+        hs_email_recipient: "sav@goensol.com",
         ...(uploadedFileIds.length > 0 && {
           hs_attachment_ids: uploadedFileIds.join(';')
         })
@@ -202,49 +223,6 @@ serve(async (req) => {
     } else {
       const emailResult = await createEmailResponse.json()
       console.log('Email engagement created successfully with ID:', emailResult.id)
-    }
-
-    // Attach files using engagements API if files were uploaded
-    if (uploadedFileIds.length > 0) {
-      console.log('Attaching files via engagements API')
-      
-      const engagementData = {
-        engagement: {
-          active: true,
-          type: 'NOTE',
-          timestamp: Date.now()
-        },
-        associations: {
-          ticketIds: [parseInt(ticketId)]
-        },
-        attachments: uploadedFileIds.map(fileId => ({
-          id: parseInt(fileId)
-        })),
-        metadata: {
-          body: `<b>${uploadedFileIds.length}</b> fichiers soumis via le formulaire`
-        }
-      }
-
-      console.log('Engagement data:', JSON.stringify(engagementData, null, 2))
-
-      const createEngagementResponse = await fetch('https://api.hubapi.com/engagements/v1/engagements', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(engagementData)
-      })
-
-      console.log('Engagement response status:', createEngagementResponse.status)
-      
-      if (!createEngagementResponse.ok) {
-        const errorText = await createEngagementResponse.text()
-        console.error('Failed to create file engagement. Status:', createEngagementResponse.status, 'Error:', errorText)
-      } else {
-        const engagementResult = await createEngagementResponse.json()
-        console.log('File engagement created successfully with ID:', engagementResult.engagement.id)
-      }
     }
 
     return Response.json(
