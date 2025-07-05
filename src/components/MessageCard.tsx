@@ -40,11 +40,11 @@ const MessageCard = ({ message, attachments, onPhotoClick }: MessageCardProps) =
           </CardContent>
         </Card>
         
-        {/* Photo attachments - only render container if attachments exist */}
-        {attachments && attachments.length > 0 && (
+        {/* Photo attachments - only render container if valid attachments exist */}
+        {attachments && attachments.length > 0 && attachments.some(att => att.url && att.id) && (
           <div className="mt-2">
             <MessageAttachments 
-              attachments={attachments}
+              attachments={attachments.filter(att => att.url && att.id)}
               isClient={message.isClient}
               onPhotoClick={onPhotoClick}
             />

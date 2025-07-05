@@ -7,11 +7,14 @@ interface MessageAttachmentsProps {
 }
 
 const MessageAttachments = ({ attachments, isClient, onPhotoClick }: MessageAttachmentsProps) => {
-  if (!attachments || attachments.length === 0) return null;
+  // Filter out invalid attachments
+  const validAttachments = attachments.filter(att => att && att.url && att.id);
+  
+  if (!validAttachments || validAttachments.length === 0) return null;
 
   return (
     <div className={`flex flex-wrap gap-2 ${isClient ? 'justify-end' : 'justify-start'}`}>
-      {attachments.map((attachment) => (
+      {validAttachments.map((attachment) => (
         <div
           key={attachment.id}
           className="w-16 h-16 rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
