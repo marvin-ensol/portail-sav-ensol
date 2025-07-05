@@ -51,7 +51,7 @@ const FileUploadArea = ({
           multiple
           className="hidden"
           onChange={(e) => onFileSelect(e.target.files)}
-          accept="image/*,.pdf,.doc,.docx,.txt"
+          accept=".jpg,.jpeg,.png,.pdf,.docx,.heic,.heif"
         />
       </div>
     </div>

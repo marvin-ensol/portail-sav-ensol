@@ -34,12 +34,67 @@ serve(async (req) => {
 
     console.log('Creating ticket for contact:', contactId, 'deal:', dealId, 'subject:', subject)
 
-    // Create the ticket
+    // Upload files to HubSpot first if any
+    let uploadedFileIds: string[] = []
+    if (files && files.length > 0) {
+      console.log('Uploading', files.length, 'files to HubSpot')
+      
+      for (const file of files) {
+        try {
+          // Decode base64 content
+          const binaryString = atob(file.content)
+          const bytes = new Uint8Array(binaryString.length)
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i)
+          }
+          
+          // Create FormData for file upload
+          const formData = new FormData()
+          const blob = new Blob([bytes], { type: file.type })
+          
+          formData.append('file', blob, file.name)
+          formData.append('options', JSON.stringify({
+            access: 'PRIVATE',
+            ttl: 'P3M', // 3 months
+            overwrite: false
+          }))
+
+          const uploadResponse = await fetch('https://api.hubapi.com/files/v3/files', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+            },
+            body: formData
+          })
+
+          if (uploadResponse.ok) {
+            const uploadResult = await uploadResponse.json()
+            uploadedFileIds.push(uploadResult.objects[0].id)
+            console.log('File uploaded successfully:', file.name, 'ID:', uploadResult.objects[0].id)
+          } else {
+            const errorText = await uploadResponse.text()
+            console.error('Failed to upload file:', file.name, 'Status:', uploadResponse.status, 'Error:', errorText)
+          }
+        } catch (fileError) {
+          console.error('Error uploading file:', file.name, fileError)
+        }
+      }
+      console.log('Total files uploaded successfully:', uploadedFileIds.length)
+    }
+
+    // Create the ticket with file attachments
+    const ticketProperties: any = {
+      hs_pipeline_stage: '1',
+      subject: subject
+    }
+
+    // Add file IDs if any were uploaded
+    if (uploadedFileIds.length > 0) {
+      ticketProperties.hs_file_upload = uploadedFileIds.join(';')
+    }
+
     const ticketData = {
-      properties: {
-        hs_pipeline_stage: '1',
-        subject: subject
-      },
+      properties: ticketProperties,
       associations: [
         {
           to: { id: contactId },

@@ -118,8 +118,22 @@ const SupportTicketForm = () => {
         dealId: selectedDeal?.dealId,
         subject,
         description, 
-        files 
+        files: files.map(f => ({ name: f.name, size: f.size, type: f.type }))
       });
+
+      // Convert files to base64 for transfer
+      const filesWithContent = await Promise.all(
+        files.map(async (file) => {
+          const arrayBuffer = await file.arrayBuffer();
+          const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+          return {
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            content: base64
+          };
+        })
+      );
       
       const { data, error } = await supabase.functions.invoke('create-hubspot-ticket', {
         body: {
@@ -127,11 +141,7 @@ const SupportTicketForm = () => {
           dealId: selectedDeal?.dealId || null,
           subject,
           description,
-          files: files.map(file => ({
-            name: file.name,
-            size: file.size,
-            type: file.type
-          }))
+          files: filesWithContent
         }
       });
 
