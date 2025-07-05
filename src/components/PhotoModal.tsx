@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { createPortal } from "react-dom";
 import type { PhotoAttachment } from "@/types/ticket";
 
 interface PhotoModalProps {
@@ -10,10 +11,9 @@ interface PhotoModalProps {
 const PhotoModal = ({ photo, onClose, onDownload }: PhotoModalProps) => {
   if (!photo) return null;
 
-  return (
+  const modalContent = (
     <div 
-      className="fixed inset-0 z-[9999] bg-black bg-opacity-75 flex items-center justify-center p-4"
-      style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
+      className="fixed inset-0 z-[9999] bg-black/75 flex items-center justify-center p-4"
       onClick={onClose}
     >
       <div 
@@ -48,6 +48,8 @@ const PhotoModal = ({ photo, onClose, onDownload }: PhotoModalProps) => {
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };
 
 export default PhotoModal;

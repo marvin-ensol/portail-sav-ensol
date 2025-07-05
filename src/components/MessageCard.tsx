@@ -28,7 +28,7 @@ const MessageCard = ({ message, attachments, onPhotoClick }: MessageCardProps) =
 
   return (
     <div className={`flex ${message.isClient ? 'justify-end' : 'justify-start'}`}>
-      <div className="max-w-[80%] space-y-2">
+      <div className="max-w-[80%]">
         <Card className={`${message.isClient ? 'bg-message-client' : 'bg-message-ensol'} text-foreground border-0`}>
           <CardContent className="p-3">
             <div 
@@ -40,17 +40,19 @@ const MessageCard = ({ message, attachments, onPhotoClick }: MessageCardProps) =
           </CardContent>
         </Card>
         
-        <div className={`flex flex-col ${message.isClient ? 'items-end' : 'items-start'}`}>
-          {/* Photo attachments - only render container if attachments exist */}
-          {attachments && attachments.length > 0 && (
+        {/* Photo attachments - only render container if attachments exist */}
+        {attachments && attachments.length > 0 && (
+          <div className="mt-2">
             <MessageAttachments 
               attachments={attachments}
               isClient={message.isClient}
               onPhotoClick={onPhotoClick}
             />
-          )}
-          
-          {/* Timestamp */}
+          </div>
+        )}
+        
+        {/* Timestamp */}
+        <div className={`flex ${message.isClient ? 'justify-end' : 'justify-start'} mt-2`}>
           <span className="text-xs text-muted-foreground">
             {formatMessageTime(message.timestamp)}
           </span>
