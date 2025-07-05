@@ -41,15 +41,25 @@ const MessageCard = ({ message, attachments, onPhotoClick }: MessageCardProps) =
         </Card>
         
         {/* Photo attachments - only render container if valid attachments exist */}
-        {attachments && attachments.length > 0 && attachments.some(att => att.url && att.id) && (
-          <div className="mt-2">
-            <MessageAttachments 
-              attachments={attachments.filter(att => att.url && att.id)}
-              isClient={message.isClient}
-              onPhotoClick={onPhotoClick}
-            />
-          </div>
-        )}
+        {(() => {
+          console.log(`Message ${message.id} attachments:`, attachments);
+          const validAttachments = attachments?.filter(att => att && att.url && att.id && att.url.trim() !== '');
+          console.log(`Message ${message.id} valid attachments:`, validAttachments);
+          
+          if (!validAttachments || validAttachments.length === 0) {
+            return null;
+          }
+          
+          return (
+            <div className="mt-2">
+              <MessageAttachments 
+                attachments={validAttachments}
+                isClient={message.isClient}
+                onPhotoClick={onPhotoClick}
+              />
+            </div>
+          );
+        })()}
         
         {/* Timestamp */}
         <div className={`flex ${message.isClient ? 'justify-end' : 'justify-start'} mt-2`}>
