@@ -44,7 +44,7 @@ serve(async (req) => {
     }
 
     // Batch read attachment details
-    const attachmentDetailsUrl = 'https://api.hubapi.com/filemanager/api/v3/files/batch/read';
+    const attachmentDetailsUrl = 'https://api.hubapi.com/files/v3/files/batch/read';
     const attachmentDetailsBody = {
       inputs: attachmentIds.map((id: string) => ({ id })),
       properties: [
