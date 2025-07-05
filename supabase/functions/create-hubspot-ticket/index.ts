@@ -155,16 +155,16 @@ serve(async (req) => {
     console.log('Creating comprehensive note for ticket:', ticketId)
     
     // Build note content with description and file information
-    let noteContent = `<b>Nouveau ticket soumis en ligne :</b>\n${description}\n\n`
+    let noteContent = `<b>Nouveau ticket soumis en ligne :</b><br>${description}<br><br>`
     
     if (files && files.length > 0 && uploadedFileIds.length > 0) {
-      noteContent += `<b>Fichiers joints :</b>\n`
+      noteContent += `<b>Fichiers joints :</b><br>`
       files.forEach((file, index) => {
         if (uploadedFileIds[index]) {
-          noteContent += `• ${file.name} (${(file.size / 1024).toFixed(1)} KB)\n`
+          noteContent += `• ${file.name} (${(file.size / 1024).toFixed(1)} KB)<br>`
         }
       })
-      noteContent += `\n`
+      noteContent += `<br>`
     }
     
     console.log('Note data:', JSON.stringify({
@@ -209,10 +209,14 @@ serve(async (req) => {
 
     // Add attachments if files were uploaded
     if (uploadedFileIds.length > 0) {
+      console.log('Adding attachments to note. File IDs:', uploadedFileIds)
       notePayload.attachments = uploadedFileIds.map(fileId => ({
         id: fileId
       }))
+      console.log('Attachments array:', JSON.stringify(notePayload.attachments, null, 2))
     }
+
+    console.log('Complete note payload:', JSON.stringify(notePayload, null, 2))
 
     const createNoteResponse = await fetch('https://api.hubapi.com/crm/v3/objects/notes', {
       method: 'POST',
