@@ -12,7 +12,7 @@ const TicketStatusBadge = ({ status, pipelineStage, lastModified }: TicketStatus
       '573356530': { label: 'En cours de traitement', color: 'bg-blue-100 text-blue-700' },
       '573359340': { label: 'Intervention planifiée', color: 'bg-orange-100 text-orange-700' },
       '573356532': { label: 'Intervention effectuée', color: 'bg-purple-100 text-purple-700' },
-      '4': { label: 'Résolu', color: 'bg-green-100 text-green-700' }
+      '4': { label: 'Résolue', color: 'bg-green-100 text-green-700' }
     };
     return statusMap[status] || { label: 'Statut inconnu', color: 'bg-gray-100 text-gray-700' };
   };
@@ -21,7 +21,7 @@ const TicketStatusBadge = ({ status, pipelineStage, lastModified }: TicketStatus
     if (!dateString) return null;
     try {
       const date = new Date(dateString);
-      return `Résolu le ${date.toLocaleDateString('fr-FR', {
+      return `Résolue le ${date.toLocaleDateString('fr-FR', {
         day: '2-digit',
         month: '2-digit',
         year: '2-digit'
@@ -34,7 +34,7 @@ const TicketStatusBadge = ({ status, pipelineStage, lastModified }: TicketStatus
   const statusBadge = getStatusBadge(pipelineStage || status);
   const isResolved = pipelineStage === "4" || status === "4";
   const statusLabel = isResolved && lastModified 
-    ? `Résolu le ${formatClosedDate(lastModified)?.replace('Résolu le ', '')}`
+    ? `Résolue le ${formatClosedDate(lastModified)?.replace('Résolue le ', '')}`
     : statusBadge.label;
 
   return (

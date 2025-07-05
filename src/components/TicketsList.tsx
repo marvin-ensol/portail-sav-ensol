@@ -49,7 +49,7 @@ const TicketsList = ({
       '573356530': { label: 'En cours de traitement', color: 'bg-blue-100 text-blue-700' },
       '573359340': { label: 'Intervention planifiée', color: 'bg-orange-100 text-orange-700' },
       '573356532': { label: 'Intervention effectuée', color: 'bg-purple-100 text-purple-700' },
-      '4': { label: 'Résolu', color: 'bg-green-100 text-green-700' }
+      '4': { label: 'Résolue', color: 'bg-green-100 text-green-700' }
     };
     return statusMap[status] || { label: 'Statut inconnu', color: 'bg-gray-100 text-gray-700' };
   };
