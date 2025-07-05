@@ -57,6 +57,7 @@ serve(async (req) => {
           const blob = new Blob([bytes], { type: file.type })
           
           formData.append('file', blob, file.name)
+          formData.append('folderId', '250402102515')
           formData.append('options', JSON.stringify({
             access: 'PRIVATE',
             ttl: 'P3M', // 3 months
