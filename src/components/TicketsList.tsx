@@ -45,7 +45,7 @@ const TicketsList = ({
   const getStatusBadge = (status: string) => {
     const statusMap: Record<string, { label: string; color: string }> = {
       '1': { label: 'Nous allons bientôt traiter votre demande', color: 'bg-yellow-100 text-yellow-700' },
-      '2': { label: 'Nous vous demandons plus d\'informations', color: 'bg-red-100 text-red-700' },
+      '2': { label: 'Nous vous demandons plus d\'informations', color: 'bg-gray-100 text-gray-700' },
       '573356530': { label: 'En cours de traitement', color: 'bg-blue-100 text-blue-700' },
       '573359340': { label: 'Intervention planifiée', color: 'bg-orange-100 text-orange-700' },
       '573356532': { label: 'Intervention effectuée', color: 'bg-purple-100 text-purple-700' },

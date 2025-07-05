@@ -10,10 +10,9 @@ interface ContactSearchProps {
   autoSubmitted: boolean;
   initialFormData?: FormData;
   searchResult?: SearchResult | null;
-  onSkipAutoVerification?: () => void;
 }
 
-const ContactSearch = ({ onSubmit, isLoading, autoSubmitted, initialFormData, searchResult, onSkipAutoVerification }: ContactSearchProps) => {
+const ContactSearch = ({ onSubmit, isLoading, autoSubmitted, initialFormData, searchResult }: ContactSearchProps) => {
   const [formData, setFormData] = useState<FormData>(
     initialFormData || { method: "phone", value: "" }
   );
@@ -235,19 +234,11 @@ const ContactSearch = ({ onSubmit, isLoading, autoSubmitted, initialFormData, se
             )}
 
             {autoSubmitted && isLoading && (
-              <div className="text-center py-4 space-y-3">
+              <div className="text-center py-4">
                 <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground mt-2">
                   Vérification automatique de vos informations...
                 </p>
-                {onSkipAutoVerification && (
-                  <button
-                    onClick={onSkipAutoVerification}
-                    className="text-xs text-muted-foreground hover:text-foreground underline"
-                  >
-                    Ignorer et saisir manuellement
-                  </button>
-                )}
               </div>
             )}
           </div>

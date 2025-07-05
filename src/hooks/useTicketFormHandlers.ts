@@ -1,6 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { IdentificationMethod, DealData, TicketData } from "@/types/hubspot";
-import { saveContactSession } from "@/utils/contactCookies";
 
 interface UseTicketFormHandlersProps {
   searchContact: (method: IdentificationMethod, value: string) => Promise<any>;
@@ -36,9 +35,6 @@ export const useTicketFormHandlers = ({
     
     // If contact found, search for tickets and deals
     if (result?.found && result.contact) {
-      // Save contact session to cookie
-      saveContactSession(method, value);
-      
       const [foundTickets, foundDeals] = await Promise.all([
         searchTickets(result.contact.contactId),
         searchDeals(result.contact.contactId)
