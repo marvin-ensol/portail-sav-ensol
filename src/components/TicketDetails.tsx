@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import DealInfoCard from "./DealInfoCard";
 import MessageCard from "./MessageCard";
@@ -116,8 +116,11 @@ const TicketDetails = ({ ticket, deal, onBack }: TicketDetailsProps) => {
       <Card className="p-4 bg-card border border-border">
         <div className="space-y-4">
           {messagesLoading ? (
-            <div className="text-center text-muted-foreground">
-              Chargement des messages...
+            <div className="text-center py-8">
+              <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary mb-3" />
+              <p className="text-muted-foreground">
+                Chargement des messages...
+              </p>
             </div>
           ) : messages.length === 0 ? (
             <div className="text-center text-muted-foreground">
