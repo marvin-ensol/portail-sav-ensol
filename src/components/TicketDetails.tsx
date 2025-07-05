@@ -201,10 +201,10 @@ const TicketDetails = ({ ticket, deal, onBack }: TicketDetailsProps) => {
                       </CardContent>
                     </Card>
                     
-                    <div className={`flex flex-col ${message.isClient ? 'items-end' : 'items-start'} space-y-2`}>
+                    <div className={`flex flex-col ${message.isClient ? 'items-end' : 'items-start'}`}>
                       {/* Photo attachments */}
                       {messageAttachments[message.id] && messageAttachments[message.id].length > 0 && (
-                        <div className={`flex flex-wrap gap-2 ${message.isClient ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`flex flex-wrap gap-2 mb-2 ${message.isClient ? 'justify-end' : 'justify-start'}`}>
                           {messageAttachments[message.id].map((attachment) => (
                             <div
                               key={attachment.id}
