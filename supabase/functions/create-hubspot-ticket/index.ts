@@ -168,7 +168,8 @@ serve(async (req) => {
     
     const noteData = {
       properties: {
-        hs_note_body: noteContent
+        hs_note_body: noteContent,
+        hs_timestamp: Date.now()
       },
       associations: [
         {
