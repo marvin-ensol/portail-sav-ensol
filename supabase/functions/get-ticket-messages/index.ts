@@ -99,7 +99,8 @@ serve(async (req) => {
         "hs_timestamp",
         "hs_email_html", 
         "hs_email_direction",
-        "hs_email_subject"
+        "hs_email_subject",
+        "hs_attachment_ids"
       ]
     };
 
@@ -143,6 +144,7 @@ serve(async (req) => {
         text: email.properties?.hs_email_html || '',
         direction: email.properties?.hs_email_direction || 'UNKNOWN',
         subject: email.properties?.hs_email_subject || '',
+        attachmentIds: email.properties?.hs_attachment_ids || [],
         isClient: email.properties?.hs_email_direction === 'INCOMING_EMAIL',
         isEnsol: email.properties?.hs_email_direction === 'EMAIL'
       }))

@@ -64,9 +64,14 @@ export const sanitizeMessageHtml = (html: string): string => {
   }
   
   // Clean up extra whitespace and normalize line breaks
+  // Normalize multiple line breaks and paragraphs to prevent excessive spacing
   return result
     .replace(/\s+/g, ' ')
     .replace(/\s*<br>\s*/g, '<br>')
     .replace(/\s*<\/p>\s*<p>\s*/g, '</p><p>')
+    .replace(/(<br>\s*){2,}/g, '<br>') // Multiple <br> tags to single <br>
+    .replace(/(<\/p><p>\s*){2,}/g, '</p><p>') // Multiple paragraph breaks to single
+    .replace(/<br>\s*<\/p><p>/g, '</p><p>') // Remove <br> before paragraph break
+    .replace(/<\/p><p>\s*<br>/g, '</p><p>') // Remove <br> after paragraph break
     .trim();
 };

@@ -13,8 +13,19 @@ interface TicketMessage {
   text: string;
   direction: string;
   subject: string;
+  attachmentIds: string[];
   isClient: boolean;
   isEnsol: boolean;
+}
+
+interface PhotoAttachment {
+  id: string;
+  name: string;
+  extension: string;
+  type: string;
+  size: number;
+  url: string;
+  createdAt: string | null;
 }
 
 interface TicketDetailsProps {
@@ -26,6 +37,8 @@ interface TicketDetailsProps {
 const TicketDetails = ({ ticket, deal, onBack }: TicketDetailsProps) => {
   const [messages, setMessages] = useState<TicketMessage[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(true);
+  const [selectedPhoto, setSelectedPhoto] = useState<PhotoAttachment | null>(null);
+  const [messageAttachments, setMessageAttachments] = useState<Record<string, PhotoAttachment[]>>({});
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -47,6 +60,15 @@ const TicketDetails = ({ ticket, deal, onBack }: TicketDetailsProps) => {
         if (data.success && data.messages) {
           setMessages(data.messages);
           console.log(`Loaded ${data.messages.length} messages`);
+          
+          // Fetch attachments for messages that have them
+          const messagesWithAttachments = data.messages.filter((msg: TicketMessage) => 
+            msg.attachmentIds && msg.attachmentIds.length > 0
+          );
+          
+          if (messagesWithAttachments.length > 0) {
+            await fetchAttachmentsForMessages(messagesWithAttachments);
+          }
         }
       } catch (error) {
         console.error('Error fetching messages:', error);
@@ -57,6 +79,34 @@ const TicketDetails = ({ ticket, deal, onBack }: TicketDetailsProps) => {
 
     fetchMessages();
   }, [ticket.ticketId]);
+
+  const fetchAttachmentsForMessages = async (messagesWithAttachments: TicketMessage[]) => {
+    try {
+      const attachmentsMap: Record<string, PhotoAttachment[]> = {};
+      
+      for (const message of messagesWithAttachments) {
+        if (message.attachmentIds.length > 0) {
+          const { data, error } = await supabase.functions.invoke('get-hubspot-attachments', {
+            body: { attachmentIds: message.attachmentIds }
+          });
+
+          if (error) {
+            console.error('Error fetching attachments for message:', message.id, error);
+            continue;
+          }
+
+          if (data.success && data.attachments) {
+            attachmentsMap[message.id] = data.attachments;
+            console.log(`Loaded ${data.attachments.length} photo attachments for message ${message.id}`);
+          }
+        }
+      }
+      
+      setMessageAttachments(attachmentsMap);
+    } catch (error) {
+      console.error('Error fetching message attachments:', error);
+    }
+  };
 
   const formatMessageTime = (dateString: string | null) => {
     if (!dateString) return '';
@@ -90,14 +140,16 @@ const TicketDetails = ({ ticket, deal, onBack }: TicketDetailsProps) => {
 
   const isTicketClosed = ticket.status === "4" || ticket.hs_pipeline_stage === "4";
   const closedDateText = isTicketClosed ? formatClosedDate(ticket.lastModified) : null;
-  
-  console.log('Ticket status debug:', {
-    status: ticket.status,
-    hs_pipeline_stage: ticket.hs_pipeline_stage,
-    lastModified: ticket.lastModified,
-    isTicketClosed,
-    closedDateText
-  });
+
+  const downloadPhoto = (attachment: PhotoAttachment) => {
+    const link = document.createElement('a');
+    link.href = attachment.url;
+    link.download = attachment.name;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="space-y-6">
@@ -138,6 +190,26 @@ const TicketDetails = ({ ticket, deal, onBack }: TicketDetailsProps) => {
                     </Card>
                     
                     <div className={`flex flex-col ${message.isClient ? 'items-end' : 'items-start'} space-y-2`}>
+                      {/* Photo attachments */}
+                      {messageAttachments[message.id] && messageAttachments[message.id].length > 0 && (
+                        <div className={`flex flex-wrap gap-2 ${message.isClient ? 'justify-end' : 'justify-start'}`}>
+                          {messageAttachments[message.id].map((attachment) => (
+                            <div
+                              key={attachment.id}
+                              className="w-16 h-16 rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                              onClick={() => setSelectedPhoto(attachment)}
+                            >
+                              <img
+                                src={attachment.url}
+                                alt={attachment.name}
+                                className="w-full h-full object-cover"
+                                loading="lazy"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      
                       {/* Timestamp */}
                       <span className="text-xs text-muted-foreground">
                         {formatMessageTime(message.timestamp)}
@@ -160,6 +232,45 @@ const TicketDetails = ({ ticket, deal, onBack }: TicketDetailsProps) => {
           )}
         </div>
       </Card>
+
+      {/* Photo Modal */}
+      {selectedPhoto && (
+        <div 
+          className="fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center p-4"
+          onClick={() => setSelectedPhoto(null)}
+        >
+          <div 
+            className="relative max-w-4xl max-h-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={selectedPhoto.url}
+              alt={selectedPhoto.name}
+              className="max-w-full max-h-full object-contain rounded-lg"
+            />
+            
+            {/* Controls */}
+            <div className="absolute top-4 right-4 flex gap-2">
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => downloadPhoto(selectedPhoto)}
+                className="bg-black/50 text-white hover:bg-black/70"
+              >
+                Download
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => setSelectedPhoto(null)}
+                className="bg-black/50 text-white hover:bg-black/70"
+              >
+                ✕
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Back Button */}
       <div className="pt-4 border-t">
