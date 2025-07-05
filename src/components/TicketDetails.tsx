@@ -46,7 +46,7 @@ const TicketDetails = ({ ticket, deal, onBack }: TicketDetailsProps) => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold text-foreground">
+      <h2 className="text-xl font-semibold text-foreground text-center">
         {ticket.subject}
       </h2>
       
@@ -55,15 +55,13 @@ const TicketDetails = ({ ticket, deal, onBack }: TicketDetailsProps) => {
         <DealInfoCard deal={deal} />
       )}
       
-      {/* Conversation Area */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium text-foreground">Messages</h3>
-        
+      {/* Conversation Area - Framed */}
+      <Card className="p-4 bg-card border border-border">
         <div className="space-y-4">
           {/* Initial message bubble (customer) */}
           <div className="flex justify-end">
             <div className="max-w-[80%] space-y-2">
-              <Card className="bg-primary text-primary-foreground">
+              <Card className="bg-message-client text-foreground border-0">
                 <CardContent className="p-3">
                   <p className="text-sm">
                     {ticket.subject}
@@ -77,18 +75,20 @@ const TicketDetails = ({ ticket, deal, onBack }: TicketDetailsProps) => {
                   {formatMessageTime(ticket.createdDate)}
                 </span>
                 
-                {/* Closed status */}
+                {/* Closed status - centered */}
                 {closedDateText && (
-                  <div className="flex items-center space-x-2 text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
-                    <span>✓</span>
-                    <span>{closedDateText}</span>
+                  <div className="w-full flex justify-center">
+                    <div className="flex items-center space-x-2 text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
+                      <span>✓</span>
+                      <span>{closedDateText}</span>
+                    </div>
                   </div>
                 )}
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </Card>
       
       {/* Back Button */}
       <div className="pt-4 border-t">

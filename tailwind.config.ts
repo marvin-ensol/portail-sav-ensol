@@ -61,6 +61,10 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				message: {
+					client: 'hsl(var(--message-client))',
+					ensol: 'hsl(var(--message-ensol))'
 				}
 			},
 			borderRadius: {
