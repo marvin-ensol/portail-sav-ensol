@@ -124,16 +124,16 @@ const StepRenderer = ({
 
       {/* Step 5: Success Page */}
       {currentStep === 5 && (
-        <div className="text-center space-y-4">
-          <div className="text-green-600 mb-4">
-            <div className="w-16 h-16 mx-auto bg-green-100 rounded-full flex items-center justify-center animate-scale-in">
-              <Check className="w-8 h-8 animate-fade-in" strokeWidth={3} />
+        <div className="text-center space-y-6">
+          <div className="text-green-600">
+            <div className="w-16 h-16 mx-auto bg-green-100 rounded-full flex items-center justify-center animate-scale-in transition-all duration-500 delay-200">
+              <Check className="w-8 h-8 animate-fade-in transition-all duration-700 delay-500" strokeWidth={3} />
             </div>
           </div>
           
           <Button
             onClick={onViewTickets}
-            className="w-full h-12 text-base font-medium"
+            className="w-full h-12 text-base font-medium mt-6"
           >
             Voir mes demandes
           </Button>
