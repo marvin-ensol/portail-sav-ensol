@@ -137,10 +137,6 @@ const StepRenderer = ({
       {/* Step 5: Success Page */}
       {currentStep === 5 && (
         <div className="text-center space-y-6">
-          <h2 className="text-xl font-semibold text-center">
-            Demande envoyée
-          </h2>
-          
           <p className="text-muted-foreground">
             Notre équipe étudie votre demande et vous contactera dans les plus brefs délais
           </p>
