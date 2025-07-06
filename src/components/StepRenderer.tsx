@@ -137,8 +137,8 @@ const StepRenderer = ({
       {/* Step 5: Success Page */}
       {currentStep === 5 && (
         <div className="text-center space-y-6">
-          <div className="text-green-600">
-            <div className="w-16 h-16 mx-auto bg-green-100 rounded-full flex items-center justify-center">
+          <div className="text-green-600 flex justify-center">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
               <Check className="w-8 h-8" strokeWidth={3} />
             </div>
           </div>
