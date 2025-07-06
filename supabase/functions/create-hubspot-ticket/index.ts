@@ -104,7 +104,8 @@ serve(async (req) => {
     // Create the ticket with file attachments
     const ticketProperties: any = {
       hs_pipeline_stage: '1',
-      subject: subject
+      subject: subject,
+      is_created_from_support_portal: 'true'
     }
 
     // Don't set hs_file_upload on ticket - files will be attached via engagements
