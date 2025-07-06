@@ -30,7 +30,7 @@ const TicketFormHeader = ({ currentStep, searchResult }: TicketFormHeaderProps) 
       case 4:
         return "Envoi d'une nouvelle demande";
       case 5:
-        return "Notre équipe étudie votre demande et vous contactera dans les plus brefs délais";
+        return ""; // Let StepRenderer handle the description for success page
       case 6:
         return "Détail de votre demande";
       default:
