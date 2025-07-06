@@ -28,6 +28,7 @@ export interface DealData {
   dealType: string | null;
   address: string;
   postcode: string;
+  city: string;
   dateEnteredInstallationDone: string | null;
   products: string[];
   isQuoteSigned: string;

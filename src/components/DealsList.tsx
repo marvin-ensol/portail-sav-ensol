@@ -83,8 +83,8 @@ const DealsList = ({ deals, isLoading, onDealClick }: DealsListProps) => {
                     <div className="flex items-center space-x-2">
                       <Building2 className="h-4 w-4 text-primary" />
                       <h4 className="font-semibold text-foreground">
-                        {deal.address && deal.postcode 
-                          ? `${deal.address}, ${deal.postcode}`
+                        {deal.address && deal.city 
+                          ? `${deal.address}, ${deal.city}`
                           : deal.name
                         }
                       </h4>
