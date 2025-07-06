@@ -136,8 +136,16 @@ const StepRenderer = ({
 
       {/* Step 5: Success Page */}
       {currentStep === 5 && (
-        <div className="text-center space-y-6">
-          <div className="text-green-600 flex justify-center">
+        <div className="text-center space-y-4">
+          <h2 className="text-xl font-semibold text-center mb-6">
+            Demande envoyée
+          </h2>
+          
+          <p className="text-muted-foreground mb-6">
+            Notre équipe étudie votre demande et vous contactera dans les plus brefs délais
+          </p>
+          
+          <div className="text-green-600 flex justify-center mb-6">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
               <Check className="w-8 h-8" strokeWidth={3} />
             </div>
