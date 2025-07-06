@@ -189,9 +189,7 @@ serve(async (req) => {
       },
       metadata: {
         from: contactEmail,
-        to: ["client@goensol.com"],
-        subject: subject,
-        html: htmlDescription
+        to: ["client@goensol.com"]
       },
       associations: [
         {
