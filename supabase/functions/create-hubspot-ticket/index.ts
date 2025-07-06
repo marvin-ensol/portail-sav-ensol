@@ -183,11 +183,15 @@ serve(async (req) => {
         hs_email_status: "SENT",
         hs_email_subject: subject,
         hs_email_html: htmlDescription,
-        hs_email_from_email: contactEmail,
-        hs_email_to_email: "client@goensol.com",
         ...(uploadedFileIds.length > 0 && {
           hs_attachment_ids: uploadedFileIds.join(';')
         })
+      },
+      metadata: {
+        from: contactEmail,
+        to: ["client@goensol.com"],
+        subject: subject,
+        html: htmlDescription
       },
       associations: [
         {
