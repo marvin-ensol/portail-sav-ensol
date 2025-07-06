@@ -151,9 +151,9 @@ serve(async (req) => {
 
     console.log('Ticket created successfully with ID:', ticketId)
 
-    // Fetch contact details to get the email address
+    // Fetch contact details to get the email address and name
     console.log('Fetching contact details for ID:', contactId)
-    const contactResponse = await fetch(`${HUBSPOT_BASE_URL}/objects/contacts/${contactId}?properties=email`, {
+    const contactResponse = await fetch(`${HUBSPOT_BASE_URL}/objects/contacts/${contactId}?properties=email,firstname,lastname`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -162,10 +162,15 @@ serve(async (req) => {
     })
 
     let contactEmail = 'unknown@example.com' // fallback
+    let contactFirstName = 'Unknown'
+    let contactLastName = 'Contact'
+    
     if (contactResponse.ok) {
       const contactData = await contactResponse.json()
       contactEmail = contactData.properties?.email || contactEmail
-      console.log('Contact email retrieved:', contactEmail)
+      contactFirstName = contactData.properties?.firstname || contactFirstName
+      contactLastName = contactData.properties?.lastname || contactLastName
+      console.log('Contact details retrieved:', { email: contactEmail, firstName: contactFirstName, lastName: contactLastName })
     } else {
       console.error('Failed to fetch contact details:', contactResponse.status)
     }
@@ -183,13 +188,25 @@ serve(async (req) => {
         hs_email_status: "SENT",
         hs_email_subject: subject,
         hs_email_html: htmlDescription,
+        hs_email_headers: JSON.stringify({
+          from: {
+            email: contactEmail,
+            firstName: contactFirstName,
+            lastName: contactLastName
+          },
+          to: [
+            {
+              email: "client@goensol.com",
+              firstName: "SAV",
+              lastName: "Ensol"
+            }
+          ],
+          cc: [],
+          bcc: []
+        }),
         ...(uploadedFileIds.length > 0 && {
           hs_attachment_ids: uploadedFileIds.join(';')
         })
-      },
-      metadata: {
-        from: contactEmail,
-        to: ["client@goensol.com"]
       },
       associations: [
         {
