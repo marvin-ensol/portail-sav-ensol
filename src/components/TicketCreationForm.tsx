@@ -13,9 +13,14 @@ import { useFileUpload } from "@/hooks/useFileUpload";
 import { useAdminMode } from "@/hooks/useAdminMode";
 import type { DealData } from "@/types/hubspot";
 
+interface AdminData {
+  email: string;
+  notes: string;
+}
+
 interface TicketCreationFormProps {
   deal?: DealData;
-  onSubmit: (subject: string, description: string, files: File[]) => void;
+  onSubmit: (subject: string, description: string, files: File[], adminData?: AdminData) => void;
   onBack: () => void;
   isSubmitting?: boolean;
 }
@@ -41,7 +46,14 @@ const TicketCreationForm = ({ deal, onSubmit, onBack, isSubmitting = false }: Ti
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(subject, description, attachedFiles);
+    
+    // Prepare admin data if in admin mode and fields are filled
+    const adminData = isAdminMode && adminEmail !== "@goensol.com" && adminNotes.trim() ? {
+      email: adminEmail,
+      notes: adminNotes
+    } : undefined;
+    
+    onSubmit(subject, description, attachedFiles, adminData);
   };
 
   return (

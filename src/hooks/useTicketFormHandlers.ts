@@ -102,7 +102,7 @@ export const useTicketFormHandlers = ({
     goToStep(2);
   };
 
-  const handleTicketSubmit = async (subject: string, description: string, files: File[]) => {
+  const handleTicketSubmit = async (subject: string, description: string, files: File[], adminData?: { email: string; notes: string }) => {
     setIsSubmittingTicket(true);
     try {
       if (!searchResult?.contact?.contactId) {
@@ -143,7 +143,8 @@ export const useTicketFormHandlers = ({
           dealId: selectedDeal?.dealId || null,
           subject,
           description,
-          files: filesWithContent
+          files: filesWithContent,
+          adminData
         }
       });
 

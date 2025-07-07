@@ -20,6 +20,11 @@ interface ContactDetails {
   lastName: string;
 }
 
+interface AdminData {
+  email: string;
+  notes: string;
+}
+
 async function uploadFilesToHubSpot(files: FileUpload[], accessToken: string): Promise<string[]> {
   const uploadedFileIds: string[] = []
   
@@ -254,6 +259,52 @@ async function createEmailEngagement(
   }
 }
 
+async function createAdminNote(
+  ticketId: string,
+  adminData: AdminData,
+  accessToken: string
+) {
+  console.log('Creating admin note for ticket:', ticketId)
+  
+  // Format the note HTML content
+  const noteHtml = `<div style="" dir="auto" data-top-level="true"><p style="margin:0;"><strong><span style="background-color: #FFF2CC;">Notes partagées par l'Ensolien [${adminData.email}]</span></strong></p><p style="margin:0;">${adminData.notes.replace(/\n/g, '</p><p style="margin:0;">')}</p><br></div>`
+  
+  const notePayload = {
+    properties: {
+      hs_timestamp: Date.now(),
+      hs_note_body: noteHtml
+    },
+    associations: [
+      {
+        to: { id: ticketId },
+        types: [
+          {
+            associationCategory: "HUBSPOT_DEFINED",
+            associationTypeId: 228 // Note to Ticket
+          }
+        ]
+      }
+    ]
+  }
+
+  const createNoteResponse = await fetch('https://api.hubapi.com/crm/v3/objects/notes', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(notePayload)
+  })
+
+  if (!createNoteResponse.ok) {
+    const errorText = await createNoteResponse.text()
+    console.error('Failed to create admin note. Status:', createNoteResponse.status, 'Error:', errorText)
+  } else {
+    const noteResult = await createNoteResponse.json()
+    console.log('Admin note created successfully with ID:', noteResult.id)
+  }
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -261,7 +312,7 @@ serve(async (req) => {
   }
 
   try {
-    const { contactId, dealId, subject, description, files } = await req.json()
+    const { contactId, dealId, subject, description, files, adminData } = await req.json()
 
     if (!contactId || !subject || !description) {
       return Response.json(
@@ -300,6 +351,11 @@ serve(async (req) => {
       uploadedFileIds,
       accessToken
     )
+
+    // Create admin note if admin data is provided
+    if (adminData) {
+      await createAdminNote(ticketId, adminData, accessToken)
+    }
 
     return Response.json(
       { 
