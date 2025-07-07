@@ -39,7 +39,7 @@ const AdminEmailInput = ({ value, onChange }: AdminEmailInputProps) => {
 
   return (
     <div className="space-y-2">
-      <Label htmlFor="admin-email">Adresse email Ensol</Label>
+      <Label htmlFor="admin-email">Votre adresse mail Ensol</Label>
       <Input
         id="admin-email"
         type="email"
