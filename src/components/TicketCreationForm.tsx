@@ -111,10 +111,10 @@ const TicketCreationForm = ({ deal, onSubmit, onBack, isSubmitting = false }: Ti
 
         {/* Admin Fields */}
         {isAdminMode && (
-          <Card className="p-4 bg-muted/30 border-2 border-dashed border-muted-foreground/20">
+          <Card className="p-4 bg-red-50 border-2 border-dashed border-red-200">
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                Champs admin
+              <h3 className="text-sm font-semibold text-red-700 uppercase tracking-wide">
+                CHAMPS ADMIN FACULTATIFS
               </h3>
               
               <AdminEmailInput
