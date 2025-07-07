@@ -81,10 +81,10 @@ const TicketCreationForm = ({ deal, onSubmit, onBack, isSubmitting = false }: Ti
 
         {/* Description Field */}
         <div className="space-y-2">
-          <Label htmlFor="description">Description du problème</Label>
+          <Label htmlFor="description">Message</Label>
           <Textarea
             id="description"
-            placeholder="Décrivez votre problème en détail..."
+            placeholder="Décrivez votre demande en détail ..."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             className="min-h-32"
