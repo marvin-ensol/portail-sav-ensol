@@ -1,8 +1,9 @@
 import { useState, useMemo, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Ticket, Clock, Loader2 } from "lucide-react";
+import { Ticket, Clock, Loader2, ExternalLink } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { TicketData } from "@/types/hubspot";
+import { useAdminMode } from "@/hooks/useAdminMode";
 
 interface TicketsListProps {
   tickets: TicketData[];
@@ -15,6 +16,7 @@ const TicketsList = ({
   isLoading,
   onTicketClick
 }: TicketsListProps) => {
+  const isAdminMode = useAdminMode();
   // Determine default tab based on ticket counts
   const defaultTab = useMemo(() => {
     const ongoingCount = tickets.filter(ticket => ticket.status !== "4").length;
@@ -101,11 +103,27 @@ const TicketsList = ({
             return (
               <Card 
                 key={ticket.id} 
-                className="cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-200 border-l-4 border-l-primary" 
+                className="cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-200 border-l-4 border-l-primary relative" 
                 onClick={() => onTicketClick(ticket)}
               >
                 <CardContent className="p-4">
                   <div className="space-y-3">
+                    {/* Admin HubSpot link */}
+                    {isAdminMode && (
+                      <div className="absolute top-2 right-2 z-10">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(`https://app-eu1.hubspot.com/contacts/142467012/record/0-5/${ticket.ticketId}`, '_blank');
+                          }}
+                          className="p-1 hover:bg-gray-100 rounded text-orange-600 hover:text-orange-700 transition-colors"
+                          title="Ouvrir dans HubSpot"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
+                    
                     {/* Status badge at top */}
                     <div className="flex justify-start">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusBadge.color}`}>

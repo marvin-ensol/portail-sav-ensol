@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import DealInfoCard from "./DealInfoCard";
 import MessageCard from "./MessageCard";
 import PhotoModal from "./PhotoModal";
 import TicketStatusBadge from "./TicketStatusBadge";
+import { useAdminMode } from "@/hooks/useAdminMode";
 import type { TicketData, DealData } from "@/types/hubspot";
 import type { TicketMessage, PhotoAttachment } from "@/types/ticket";
 
@@ -17,6 +18,7 @@ interface TicketDetailsProps {
 }
 
 const TicketDetails = ({ ticket, deal, onBack }: TicketDetailsProps) => {
+  const isAdminMode = useAdminMode();
   const [messages, setMessages] = useState<TicketMessage[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState<PhotoAttachment | null>(null);
@@ -102,9 +104,20 @@ const TicketDetails = ({ ticket, deal, onBack }: TicketDetailsProps) => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold text-foreground text-center">
-        {ticket.subject}
-      </h2>
+      <div className="relative">
+        <h2 className="text-xl font-semibold text-foreground text-center">
+          {ticket.subject}
+        </h2>
+        {isAdminMode && (
+          <button
+            onClick={() => window.open(`https://app-eu1.hubspot.com/contacts/142467012/record/0-5/${ticket.ticketId}`, '_blank')}
+            className="absolute top-0 right-0 p-1 hover:bg-gray-100 rounded text-orange-600 hover:text-orange-700 transition-colors"
+            title="Ouvrir dans HubSpot"
+          >
+            <ExternalLink className="h-4 w-4" />
+          </button>
+        )}
+      </div>
       
       {/* Deal Info Card */}
       {deal && (

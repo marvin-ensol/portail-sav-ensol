@@ -3,12 +3,15 @@ import { Separator } from "@/components/ui/separator";
 import ProgressIndicator from "./ProgressIndicator";
 import StepRenderer from "./StepRenderer";
 import TicketFormHeader from "./TicketFormHeader";
+import AdminBanner from "./AdminBanner";
 import { useHubSpotSearch } from "@/hooks/useHubSpotSearch";
 import { useTicketFormState } from "@/hooks/useTicketFormState";
 import { useTicketFormHandlers } from "@/hooks/useTicketFormHandlers";
 import { useUrlParams } from "@/hooks/useUrlParams";
+import { useAdminMode } from "@/hooks/useAdminMode";
 
 const SupportTicketForm = () => {
+  const isAdminMode = useAdminMode();
   const {
     currentStep,
     formData,
@@ -74,8 +77,10 @@ const SupportTicketForm = () => {
   });
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <Card className="form-card w-full max-w-md mx-auto bg-white/95 backdrop-blur-sm">
+    <>
+      {isAdminMode && <AdminBanner />}
+      <div className={`min-h-screen flex items-center justify-center p-4 ${isAdminMode ? 'pt-16' : ''}`}>
+        <Card className="form-card w-full max-w-md mx-auto bg-white/95 backdrop-blur-sm">
         <TicketFormHeader 
           currentStep={currentStep}
           searchResult={searchResult}
@@ -118,6 +123,7 @@ const SupportTicketForm = () => {
         </CardContent>
       </Card>
     </div>
+    </>
   );
 };
 
