@@ -3,11 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import DealInfoCard from "./DealInfoCard";
 import FileUploadArea from "./FileUploadArea";
 import FileAttachmentList from "./FileAttachmentList";
+import AdminEmailInput from "./AdminEmailInput";
 import { useFileUpload } from "@/hooks/useFileUpload";
+import { useAdminMode } from "@/hooks/useAdminMode";
 import type { DealData } from "@/types/hubspot";
 
 interface TicketCreationFormProps {
@@ -18,8 +21,11 @@ interface TicketCreationFormProps {
 }
 
 const TicketCreationForm = ({ deal, onSubmit, onBack, isSubmitting = false }: TicketCreationFormProps) => {
+  const isAdminMode = useAdminMode();
   const [description, setDescription] = useState("");
   const [subject, setSubject] = useState("");
+  const [adminEmail, setAdminEmail] = useState("@goensol.com");
+  const [adminNotes, setAdminNotes] = useState("");
   
   const {
     attachedFiles,
@@ -90,6 +96,33 @@ const TicketCreationForm = ({ deal, onSubmit, onBack, isSubmitting = false }: Ti
           isImageFile={isImageFile}
           onRemoveFile={removeFile}
         />
+
+        {/* Admin Fields */}
+        {isAdminMode && (
+          <Card className="p-4 bg-muted/30 border-2 border-dashed border-muted-foreground/20">
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                Champs admin
+              </h3>
+              
+              <AdminEmailInput
+                value={adminEmail}
+                onChange={setAdminEmail}
+              />
+              
+              <div className="space-y-2">
+                <Label htmlFor="admin-notes">Notes Ensol</Label>
+                <Textarea
+                  id="admin-notes"
+                  placeholder="Ces notes aident l'équipe SAV et ne sont pas visibles pour le client"
+                  value={adminNotes}
+                  onChange={(e) => setAdminNotes(e.target.value)}
+                  className="min-h-32"
+                />
+              </div>
+            </div>
+          </Card>
+        )}
 
         {/* Action Buttons */}
         <div className="flex flex-col space-y-3">

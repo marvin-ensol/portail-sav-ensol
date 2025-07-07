@@ -108,9 +108,12 @@ const TicketsList = ({
               >
                 <CardContent className="p-4">
                   <div className="space-y-3">
-                    {/* Admin HubSpot link */}
-                    {isAdminMode && (
-                      <div className="absolute top-2 right-2 z-10">
+                    {/* Status badge with admin HubSpot link */}
+                    <div className="flex justify-between items-center">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusBadge.color}`}>
+                        {statusBadge.label}
+                      </span>
+                      {isAdminMode && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -121,14 +124,7 @@ const TicketsList = ({
                         >
                           <ExternalLink className="h-4 w-4" />
                         </button>
-                      </div>
-                    )}
-                    
-                    {/* Status badge at top */}
-                    <div className="flex justify-start">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusBadge.color}`}>
-                        {statusBadge.label}
-                      </span>
+                      )}
                     </div>
                     
                     {/* Title with ticket icon */}
