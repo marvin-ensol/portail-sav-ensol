@@ -69,7 +69,14 @@ const ContactSearch = ({ onSubmit, isLoading, autoSubmitted, initialFormData, se
   }, [autoSubmitted]);
 
   const formatPhoneNumber = (value: string) => {
-    const digits = value.replace(/\D/g, '');
+    let digits = value.replace(/\D/g, '');
+    
+    // Convert international French format to national format
+    if (digits.startsWith('33') && digits.length >= 11) {
+      // Remove the 33 prefix and add 0
+      digits = '0' + digits.slice(2);
+    }
+    
     const limitedDigits = digits.slice(0, 10);
     const formatted = limitedDigits.replace(/(\d{2})(?=\d)/g, '$1 ').trim();
     return formatted;
